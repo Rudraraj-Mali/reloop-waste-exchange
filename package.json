@@ -1,0 +1,26 @@
+{
+  "name": "reloop-waste-exchange",
+  "version": "1.0.0",
+  "description": "ReLoop - Waste Exchange and Recycling Marketplace demonstrating Advanced DBMS Concepts (ACID, Triggers, Views)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mssql": "^10.0.2"
+  },
+  "keywords": [
+    "waste-management",
+    "azure-sql",
+    "dbms",
+    "acid-transactions",
+    "sql-triggers",
+    "sql-views"
+  ],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketplace | ReLoop Waste Exchange</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="brand">
+      <div class="brand-icon">♻️</div>
+      <span class="brand-text">ReLoop</span>
+      <span class="tagline">Marketplace</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="marketplace.html" class="active">Browse Marketplace</a></li>
+      <li><a href="dashboard.html">Impact Dashboard</a></li>
+      <li id="navUserSection">
+        <!-- Dynamically rendered -->
+      </li>
+    </ul>
+  </nav>
+
+  <main class="container">
+
+    <!-- Marketplace Header Banner -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
+      <div>
+        <div style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--primary); background: var(--primary-light); padding: 3px 10px; border-radius: 99px; margin-bottom: 0.5rem; border: 1px solid #a7f3d0;">
+          <span>🌐 Live Exchange</span>
+        </div>
+        <h1 style="font-size: 2.2rem; color: var(--text-title); margin-bottom: 0.35rem;">Waste Materials Exchange</h1>
+        <p style="color: var(--text-muted); font-size: 1rem; max-width: 650px;">
+          Browse available recyclable materials posted by Generators. Recyclers can claim items to initiate an exchange.
+        </p>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <span id="listingsCount" class="status-badge Available" style="font-size: 0.88rem; padding: 6px 14px;">Loading...</span>
+        <div id="createListingActionContainer">
+          <!-- Populated dynamically based on user role -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive Filter & Search Bar -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <span style="font-size: 1.1rem; color: var(--text-muted);">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search by waste title, type, or generator..." oninput="handleSearchFilter()">
+      </div>
+
+      <div class="category-chips" id="categoryChips">
+        <button class="chip active" onclick="filterByCategory('all')">All Materials</button>
+        <button class="chip" onclick="filterByCategory('plastic')">🥤 Plastic</button>
+        <button class="chip" onclick="filterByCategory('paper')">📦 Paper &amp; Cardboard</button>
+        <button class="chip" onclick="filterByCategory('metal')">⚙️ Metals</button>
+        <button class="chip" onclick="filterByCategory('glass')">🍾 Glass</button>
+        <button class="chip" onclick="filterByCategory('e-waste')">💻 E-Waste</button>
+        <button class="chip" onclick="filterByCategory('organic')">🍂 Organic</button>
+      </div>
+    </div>
+
+    <!-- Active Listings Grid -->
+    <div id="listingsGrid" class="grid grid-3">
+      <!-- Populated via JavaScript Fetch API -->
+    </div>
+
+    <!-- Modal: Post New Waste Listing (Generators Only) -->
+    <div id="listingModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>📦 Post Waste Listing</h2>
+          <button type="button" class="modal-close" onclick="closeListingModal()">&times;</button>
+        </div>
+
+        <form id="createListingForm">
+          <div class="form-group">
+            <label for="listingTitle">Waste Description / Title</label>
+            <input type="text" id="listingTitle" class="form-control" placeholder="e.g. 50kg Clean Corrugated Cardboard Boxes" required>
+          </div>
+
+          <div class="form-group">
+            <label for="listingCategorySelect">Waste Category (EPA CO₂ Factor)</label>
+            <select id="listingCategorySelect" class="form-control" required>
+              <option value="">Loading categories...</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="listingWeight">Total Weight (Kilograms)</label>
+            <input type="number" id="listingWeight" class="form-control" placeholder="e.g. 25.5" step="0.1" min="0.5" required>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.75rem;">
+            <button type="button" class="btn btn-secondary" onclick="closeListingModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Publish to Marketplace</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>ReLoop Academic Project &copy; 2026 &bull; Developed with Node.js, Express, mssql, and Azure SQL Database</p>
+  </footer>
+
+  <div id="toast"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initMarketplacePage();
+      initListingFormHandler();
+    });
+  </script>
+</body>
+</html>

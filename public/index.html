@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ReLoop | Waste Exchange & Recycling Marketplace</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="brand">
+      <div class="brand-icon">♻️</div>
+      <span class="brand-text">ReLoop</span>
+      <span class="tagline">Azure SQL &bull; DBMS</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="marketplace.html">Browse Marketplace</a></li>
+      <li><a href="dashboard.html">Impact Dashboard</a></li>
+      <li id="navUserSection">
+        <!-- Dynamically rendered -->
+      </li>
+    </ul>
+  </nav>
+
+  <main class="container">
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-pill">
+        <span>🌱 Circular Economy Marketplace</span>
+      </div>
+      <h1 class="hero-title">
+        Turn Waste Into Value.<br>
+        <span class="gradient-text">Exchange &amp; Recycle Sustainably.</span>
+      </h1>
+      <p class="hero-subtitle">
+        A platform connecting Waste Generators with certified Recyclers. Engineered as an enterprise database showcase featuring 
+        <strong>ACID Transactions with Row Locking</strong>, <strong>AFTER UPDATE Triggers</strong>, and <strong>Dynamic Analytical Views</strong> in Azure SQL.
+      </p>
+    </div>
+
+    <!-- Academic DBMS Architecture Highlight Banner -->
+    <div class="dbms-info-banner">
+      <h3>🏛️ Enterprise DBMS Concepts Demonstrated</h3>
+      <p>
+        ReLoop enforces core database-level invariants directly in the DBMS engine rather than application code:
+      </p>
+      <div class="dbms-tags">
+        <span class="dbms-tag">🔒 <strong>ACID Concurrency:</strong> <code>WITH (UPDLOCK, ROWLOCK)</code> prevents double-booking</span>
+        <span class="dbms-tag">⚡ <strong>AFTER UPDATE Trigger:</strong> <code>trg_ExchangeRequests_Completed</code> auto-awards +10 eco-points</span>
+        <span class="dbms-tag">📊 <strong>Dynamic SQL View:</strong> <code>UserImpactDashboard</code> computes CO₂ savings &amp; weight diverted</span>
+      </div>
+    </div>
+
+    <!-- Active Session Notification (if already logged in) -->
+    <div id="alreadyLoggedInBanner" style="display: none;"></div>
+
+    <div class="auth-wrapper">
+      <div class="auth-card">
+        <div class="auth-header">
+          <h1>Get Started</h1>
+          <p style="color: var(--text-muted); font-size: 0.92rem;">Sign in or create an account to begin exchanging waste.</p>
+        </div>
+
+        <!-- Auth Tabs -->
+        <div class="auth-tabs">
+          <div id="tabLogin" class="auth-tab active">Sign In</div>
+          <div id="tabRegister" class="auth-tab">Create Account</div>
+        </div>
+
+        <!-- 1. LOGIN FORM -->
+        <form id="formLogin">
+          <div class="form-group">
+            <label for="loginEmail">Email Address</label>
+            <input type="email" id="loginEmail" class="form-control" placeholder="user@example.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label for="loginPassword">Password (Academic Plain-Text)</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            Sign In to ReLoop
+          </button>
+        </form>
+
+        <!-- 2. REGISTER FORM -->
+        <form id="formRegister" style="display: none;">
+          <div class="form-group">
+            <label for="regName">Full Name / Organization</label>
+            <input type="text" id="regName" class="form-control" placeholder="e.g. Green Leaf Cafe or Metro Recyclers" required>
+          </div>
+
+          <div class="form-group">
+            <label for="regEmail">Email Address</label>
+            <input type="email" id="regEmail" class="form-control" placeholder="e.g. green@example.com" required autocomplete="email">
+          </div>
+
+          <div class="form-group">
+            <label for="regPassword">Password (Plain-Text)</label>
+            <input type="password" id="regPassword" class="form-control" placeholder="Create a password" required autocomplete="new-password">
+          </div>
+
+          <div class="form-group">
+            <label for="regUserType">User Role</label>
+            <select id="regUserType" class="form-control" required>
+              <option value="Generator">Waste Generator (Posts waste listings)</option>
+              <option value="Recycler">Recycler (Claims and collects waste)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
+            Create Account
+          </button>
+        </form>
+
+        <!-- Pre-Seeded Demo Accounts with 1-Click Fill -->
+        <div class="demo-credentials-box">
+          <p>🧪 Quick Viva / Demo Accounts (Pre-seeded in <code>database.sql</code>):</p>
+          <div class="demo-cards-grid">
+            <button type="button" class="demo-account-btn" onclick="fillDemoUser('alice@generator.com', 'password123')">
+              <span class="acc-title">🏢 Alice Green</span>
+              <span class="acc-role">Generator (Cafe Owner)</span>
+            </button>
+            <button type="button" class="demo-account-btn" onclick="fillDemoUser('bob@recycler.com', 'password123')">
+              <span class="acc-title">🚚 Bob Clean</span>
+              <span class="acc-role">Recycler (Urban Depot)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>ReLoop Academic Project &copy; 2026 &bull; Developed with Node.js, Express, mssql, and Azure SQL Database</p>
+  </footer>
+
+  <div id="toast"></div>
+
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      initAuthPage();
+      updateNavbar();
+    });
+  </script>
+</body>
+</html>
