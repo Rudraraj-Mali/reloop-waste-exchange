@@ -504,7 +504,7 @@ const API = {
 function initAuthPage() {
   const existingUser = getCurrentUser();
   if (existingUser) {
-    const banner = document.getElementById('alreadyLoggedInBanner');
+    const banner = document.getElementById('alreadyLoggedInBanner') || document.getElementById('sessionBanner');
     if (banner) {
       banner.style.display = 'block';
       banner.innerHTML = `
@@ -563,7 +563,10 @@ function initAuthPage() {
       const name      = document.getElementById('regName').value.trim();
       const email     = document.getElementById('regEmail').value.trim();
       const password  = document.getElementById('regPassword').value;
-      const user_type = document.getElementById('regUserType').value;
+      // Support both radio-button group (index.html) and a <select> (fallback)
+      const userTypeSelect = document.getElementById('regUserType');
+      const userTypeRadio  = document.querySelector('input[name="user_type"]:checked');
+      const user_type = userTypeSelect ? userTypeSelect.value : (userTypeRadio ? userTypeRadio.value : '');
       const submitBtn = formRegister.querySelector('button[type="submit"]');
       const origText  = submitBtn.innerText;
 
