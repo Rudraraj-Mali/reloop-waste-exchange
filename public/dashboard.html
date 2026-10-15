@@ -1,201 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Impact Dashboard & DBMS Demonstration | ReLoop</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — ReLoop</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>" />
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <a href="index.html" class="brand">
-      <div class="brand-icon">♻️</div>
-      <span class="brand-text">ReLoop</span>
-      <span class="tagline">Impact &amp; DBMS View</span>
-    </a>
-    <ul class="nav-links">
-      <li><a href="marketplace.html">Browse Marketplace</a></li>
-      <li><a href="dashboard.html" class="active">Impact Dashboard</a></li>
-      <li id="navUserSection">
-        <!-- Dynamically rendered -->
-      </li>
-    </ul>
-  </nav>
+  <!-- ══════════════════════ TOP APP BAR ══════════════════════ -->
+  <header class="app-bar">
+    <div class="app-bar-inner">
+      <a href="marketplace.html" class="app-bar-brand">
+        <span class="logo-mark">♻</span>
+        <span>ReLoop</span>
+      </a>
 
-  <main class="container">
-    
-    <!-- Title Section -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+      <nav class="app-bar-nav">
+        <a href="marketplace.html" class="nav-link">Marketplace</a>
+        <a href="dashboard.html" class="nav-link active">Dashboard</a>
+      </nav>
+
+      <div id="navUserSection" class="app-bar-actions">
+        <!-- Injected by app.js -->
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════ PAGE HEADER ══════════════════════ -->
+  <div class="page-header">
+    <div class="page-header-inner">
       <div>
-        <div style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--primary); background: var(--primary-light); padding: 3px 10px; border-radius: 99px; margin-bottom: 0.5rem; border: 1px solid #a7f3d0;">
-          <span>📊 Real-Time Analytics</span>
-        </div>
-        <h1 style="font-size: 2.2rem; color: var(--text-title); margin-bottom: 0.35rem;">Eco Impact &amp; Activity Hub</h1>
-        <p style="color: var(--text-muted); font-size: 1rem;">
-          Metrics computed on-demand directly from the Azure SQL Analytical View: <code>UserImpactDashboard</code>.
-        </p>
+        <h1 class="page-title">Impact Dashboard</h1>
+        <p class="page-subtitle">Your environmental impact, activity, and DBMS feature demonstrations</p>
       </div>
-
-      <div id="roleIndicatorBox"></div>
-    </div>
-
-    <!-- 1. IMPACT VIEW METRICS CARDS (Direct from Azure SQL View) -->
-    <div id="impactMetricsContainer" class="grid grid-4" style="margin-bottom: 2.5rem;">
-      <div style="grid-column: 1/-1; text-align: center; padding: 2rem; background: white; border-radius: 12px; border: 1px solid var(--border);">
-        <p style="color: var(--text-muted);">Loading live metrics from Azure SQL View...</p>
+      <div id="roleIndicatorBox">
+        <!-- Injected by JS -->
       </div>
     </div>
+  </div>
 
-    <!-- 2. GENERATOR MANAGEMENT SECTION (Visible to Generators) -->
-    <section id="generatorSection" style="display: none;">
-      
-      <!-- Academic Callout: ACID Transaction Architecture -->
-      <div class="card" style="margin-bottom: 2rem; border-left: 6px solid var(--blue); background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);">
-        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
-          <span style="font-size: 1.4rem;">🔒</span>
-          <h3 style="color: #1e40af; font-size: 1.15rem;">DBMS Concept: ACID Concurrency Control with Row Locking</h3>
-        </div>
-        <p style="font-size: 0.92rem; color: #1e3a8a; line-height: 1.6;">
-          When you click <strong>Accept (ACID)</strong> below, the application initiates an atomic transaction with 
-          <code>WITH (UPDLOCK, ROWLOCK)</code> on the <code>WasteListings</code> row in Azure SQL. 
-          This guarantees <strong>Isolation</strong> by preventing race conditions, marks the listing as <strong>'Accepted'</strong>, 
-          and automatically marks all competing pending requests as <strong>'Rejected'</strong> in one atomic commit.
-        </p>
-      </div>
+  <!-- ══════════════════════ MAIN CONTENT ══════════════════════ -->
+  <main class="page-content">
 
-      <!-- Incoming Exchange Requests Table -->
-      <div class="card" style="margin-bottom: 2.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+    <!-- ── IMPACT METRICS (from SQL VIEW) ── -->
+    <section class="dashboard-section">
+      <div class="section-header">
+        <div class="section-header-left">
+          <span class="section-icon blue">📊</span>
           <div>
-            <h2 style="font-size: 1.35rem; margin-bottom: 0.2rem;">📥 Incoming Exchange Requests</h2>
-            <p style="font-size: 0.86rem; color: var(--text-muted);">Recyclers who have requested to claim your materials</p>
+            <h2 class="section-title">Environmental Impact</h2>
+            <p class="section-subtitle">Data fetched from SQL View: <code>UserImpactDashboard</code></p>
           </div>
-          <span class="status-badge Pending" id="pendingRequestsCount">Pending Requests</span>
         </div>
-        <div class="table-wrapper">
-          <table>
+        <span class="concept-tag view-tag">SQL VIEW</span>
+      </div>
+
+      <div class="stats-grid" id="impactMetricsContainer">
+        <!-- Injected by JS: 4 × .stat-card -->
+        <div class="stat-card stat-skeleton"></div>
+        <div class="stat-card stat-skeleton"></div>
+        <div class="stat-card stat-skeleton"></div>
+        <div class="stat-card stat-skeleton"></div>
+      </div>
+    </section>
+
+    <!-- ── DBMS CONCEPT CALLOUTS ── -->
+    <div class="concept-callouts-row">
+      <div class="concept-callout acid">
+        <div class="callout-icon">🔒</div>
+        <div class="callout-body">
+          <h3 class="callout-title">ACID Transaction with Row Locking</h3>
+          <p class="callout-desc">When a Generator accepts an exchange request, the backend executes a serialized transaction with <code>WITH (UPDLOCK, ROWLOCK)</code> on the <code>WasteListings</code> row. This atomically marks the listing "Accepted" and rejects all competing pending requests — preventing double-booking race conditions.</p>
+          <div class="callout-props">
+            <span class="callout-prop">Atomicity</span>
+            <span class="callout-prop">Consistency</span>
+            <span class="callout-prop">Isolation</span>
+            <span class="callout-prop">Durability</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="concept-callout trigger">
+        <div class="callout-icon">⚡</div>
+        <div class="callout-body">
+          <h3 class="callout-title">AFTER UPDATE Trigger on ExchangeRequests</h3>
+          <p class="callout-desc">Trigger <code>trg_ExchangeRequests_Completed</code> fires automatically when a request status becomes "Completed". It updates <code>WasteListings.status</code> to "Completed" and awards <strong>+10 eco_points</strong> to the Generator — all without any application-level code.</p>
+          <div class="callout-props">
+            <span class="callout-prop trigger-prop">AFTER UPDATE</span>
+            <span class="callout-prop trigger-prop">ExchangeRequests</span>
+            <span class="callout-prop trigger-prop">WasteListings</span>
+            <span class="callout-prop trigger-prop">Users.eco_points</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         GENERATOR SECTION
+    ══════════════════════════════════════════════════════════ -->
+    <div id="generatorSection" style="display:none">
+
+      <!-- Incoming Exchange Requests -->
+      <section class="dashboard-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <span class="section-icon amber">📥</span>
+            <div>
+              <h2 class="section-title">Incoming Exchange Requests</h2>
+              <p class="section-subtitle">Recyclers requesting your materials — accept to trigger the ACID transaction</p>
+            </div>
+          </div>
+          <span class="badge badge-pending" id="pendingRequestsCount">0 Pending</span>
+        </div>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
             <thead>
               <tr>
-                <th>Request ID</th>
-                <th>Waste Listing</th>
-                <th>Recycler Info</th>
-                <th>Request Date</th>
+                <th>Request #</th>
+                <th>Listing</th>
+                <th>Recycler</th>
+                <th>Submitted</th>
                 <th>Status</th>
-                <th>ACID Concurrency Action</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="incomingRequestsTableBody">
-              <!-- Populated via app.js -->
+              <tr>
+                <td colspan="6" class="table-empty">Loading requests…</td>
+              </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
 
-      <!-- Generator's Active Listings Table -->
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-          <div>
-            <h2 style="font-size: 1.35rem; margin-bottom: 0.2rem;">📋 My Waste Listings</h2>
-            <p style="font-size: 0.86rem; color: var(--text-muted);">Inventory of recyclable materials posted by your account</p>
+      <!-- My Listings -->
+      <section class="dashboard-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <span class="section-icon green">📋</span>
+            <div>
+              <h2 class="section-title">My Waste Listings</h2>
+              <p class="section-subtitle">All listings you have published to the marketplace</p>
+            </div>
           </div>
-          <a href="marketplace.html" class="btn btn-outline btn-sm">➕ Post New Listing</a>
+          <a href="marketplace.html" class="btn btn-outlined btn-sm">+ Post New Listing</a>
         </div>
-        <div class="table-wrapper">
-          <table>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
             <thead>
               <tr>
-                <th>Listing Title</th>
+                <th>Title</th>
                 <th>Category</th>
                 <th>Weight</th>
                 <th>CO₂ Potential</th>
-                <th>Current Status</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody id="myListingsTableBody">
-              <!-- Populated via app.js -->
+              <tr>
+                <td colspan="5" class="table-empty">Loading listings…</td>
+              </tr>
             </tbody>
           </table>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 3. RECYCLER MANAGEMENT SECTION (Visible to Recyclers) -->
-    <section id="recyclerSection" style="display: none;">
-      
-      <!-- Academic Callout: Database Trigger Architecture -->
-      <div class="card" style="margin-bottom: 2rem; border-left: 6px solid var(--primary); background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 100%);">
-        <div style="display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;">
-          <span style="font-size: 1.4rem;">⚡</span>
-          <h3 style="color: #065f46; font-size: 1.15rem;">DBMS Concept: SQL AFTER UPDATE Trigger</h3>
-        </div>
-        <p style="font-size: 0.92rem; color: #064e3b; line-height: 1.6;">
-          When you collect materials and click <strong>Mark Completed (Trigger)</strong>, an <code>UPDATE</code> is issued on <code>ExchangeRequests</code>. 
-          The Azure SQL Database Trigger (<code>trg_ExchangeRequests_Completed</code>) executes automatically to:
-          <br>1. Update the corresponding <code>WasteListings</code> row to <code>'Completed'</code>.
-          <br>2. Automatically award <strong>+10 Eco Points</strong> to the Generator in the <code>Users</code> table.
-        </p>
-      </div>
+    </div><!-- /generatorSection -->
 
-      <!-- Recycler's Submitted Requests Table -->
-      <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
-          <div>
-            <h2 style="font-size: 1.35rem; margin-bottom: 0.2rem;">🚚 My Exchange Requests</h2>
-            <p style="font-size: 0.86rem; color: var(--text-muted);">Listings you have requested or picked up for recycling</p>
+    <!-- ══════════════════════════════════════════════════════════
+         RECYCLER SECTION
+    ══════════════════════════════════════════════════════════ -->
+    <div id="recyclerSection" style="display:none">
+
+      <section class="dashboard-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <span class="section-icon purple">🚚</span>
+            <div>
+              <h2 class="section-title">My Exchange Requests</h2>
+              <p class="section-subtitle">Track your material requests — mark accepted exchanges complete to fire the SQL Trigger</p>
+            </div>
           </div>
-          <a href="marketplace.html" class="btn btn-primary btn-sm">Browse Marketplace</a>
+          <a href="marketplace.html" class="btn btn-outlined btn-sm">Browse Marketplace</a>
         </div>
-        <div class="table-wrapper">
-          <table>
+
+        <div class="data-table-wrap">
+          <table class="data-table">
             <thead>
               <tr>
-                <th>Request ID</th>
-                <th>Listing Title</th>
+                <th>Request #</th>
+                <th>Listing</th>
                 <th>Category</th>
                 <th>Weight</th>
-                <th>Generator Contact</th>
-                <th>Fulfillment Action</th>
+                <th>Generator</th>
+                <th>Action</th>
               </tr>
             </thead>
             <tbody id="myRequestsTableBody">
-              <!-- Populated via app.js -->
+              <tr>
+                <td colspan="6" class="table-empty">Loading requests…</td>
+              </tr>
             </tbody>
           </table>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 4. INTERACTIVE DBMS VERIFICATION MODAL -->
-    <div id="dbmsVerificationModal" class="modal-overlay">
-      <div class="modal-content" style="max-width: 600px;">
-        <div class="modal-header">
-          <h2 id="modalTitle" style="display: flex; align-items: center; gap: 0.5rem;"></h2>
-          <button type="button" class="modal-close" onclick="closeVerificationModal()">&times;</button>
-        </div>
-        <div id="modalBody" style="font-size: 0.94rem; line-height: 1.6; color: var(--text-body);">
-          <!-- Dynamic details -->
-        </div>
-        <div style="margin-top: 1.5rem; text-align: right;">
-          <button type="button" class="btn btn-primary btn-sm" onclick="closeVerificationModal()">Got It, Continue</button>
-        </div>
-      </div>
-    </div>
+    </div><!-- /recyclerSection -->
 
   </main>
 
-  <footer>
-    <p>ReLoop Academic Project &copy; 2026 &bull; Developed with Node.js, Express, mssql, and Azure SQL Database</p>
+  <!-- ══════════════════════ FOOTER ══════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-logo">♻ ReLoop</span>
+      <p>A DBMS mini-project · Cloudflare D1 · ACID Transactions · SQL Triggers · SQL Views</p>
+    </div>
   </footer>
 
-  <div id="toast"></div>
+  <!-- ══════════════════════ DBMS VERIFICATION DIALOG ══════════════════════ -->
+  <div class="dialog-overlay" id="dbmsVerificationModal">
+    <div class="dialog dialog-lg" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="dialog-header">
+        <h2 class="dialog-title" id="modalTitle">DBMS Operation Result</h2>
+        <button class="dialog-close" onclick="closeVerificationModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="dialog-body" id="modalBody">
+        <!-- Injected by JS -->
+      </div>
+      <div class="dialog-actions" style="border-top: 1px solid var(--border); padding: 1rem 1.5rem;">
+        <button class="btn btn-filled" onclick="closeVerificationModal()">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ TOAST STACK ══════════════════════ -->
+  <div class="toast-stack" id="toastStack"></div>
 
   <script src="js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      initDashboardPage();
-    });
+    initDashboardPage();
   </script>
 </body>
 </html>

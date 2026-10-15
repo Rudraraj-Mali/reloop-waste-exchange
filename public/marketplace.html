@@ -1,122 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Marketplace | ReLoop Waste Exchange</title>
-  <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Marketplace — ReLoop</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>" />
 </head>
 <body>
 
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <a href="index.html" class="brand">
-      <div class="brand-icon">♻️</div>
-      <span class="brand-text">ReLoop</span>
-      <span class="tagline">Marketplace</span>
-    </a>
-    <ul class="nav-links">
-      <li><a href="marketplace.html" class="active">Browse Marketplace</a></li>
-      <li><a href="dashboard.html">Impact Dashboard</a></li>
-      <li id="navUserSection">
-        <!-- Dynamically rendered -->
-      </li>
-    </ul>
-  </nav>
+  <!-- ══════════════════════ TOP APP BAR ══════════════════════ -->
+  <header class="app-bar">
+    <div class="app-bar-inner">
+      <a href="marketplace.html" class="app-bar-brand">
+        <span class="logo-mark">♻</span>
+        <span>ReLoop</span>
+      </a>
 
-  <main class="container">
+      <nav class="app-bar-nav">
+        <a href="marketplace.html" class="nav-link active">Marketplace</a>
+        <a href="dashboard.html" class="nav-link">Dashboard</a>
+      </nav>
 
-    <!-- Marketplace Header Banner -->
-    <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1.5rem; margin-bottom: 2rem;">
+      <div id="navUserSection" class="app-bar-actions">
+        <!-- Injected by app.js -->
+      </div>
+    </div>
+  </header>
+
+  <!-- ══════════════════════ PAGE HEADER ══════════════════════ -->
+  <div class="page-header">
+    <div class="page-header-inner">
       <div>
-        <div style="display: inline-flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--primary); background: var(--primary-light); padding: 3px 10px; border-radius: 99px; margin-bottom: 0.5rem; border: 1px solid #a7f3d0;">
-          <span>🌐 Live Exchange</span>
-        </div>
-        <h1 style="font-size: 2.2rem; color: var(--text-title); margin-bottom: 0.35rem;">Waste Materials Exchange</h1>
-        <p style="color: var(--text-muted); font-size: 1rem; max-width: 650px;">
-          Browse available recyclable materials posted by Generators. Recyclers can claim items to initiate an exchange.
-        </p>
+        <h1 class="page-title">Waste Exchange Marketplace</h1>
+        <p class="page-subtitle">Browse available recyclable materials from generators in your area</p>
       </div>
-
-      <div style="display: flex; align-items: center; gap: 1rem;">
-        <span id="listingsCount" class="status-badge Available" style="font-size: 0.88rem; padding: 6px 14px;">Loading...</span>
-        <div id="createListingActionContainer">
-          <!-- Populated dynamically based on user role -->
-        </div>
+      <div id="createListingActionContainer">
+        <!-- Injected by JS: Post Listing button for Generators OR info badge for Recyclers -->
       </div>
     </div>
+  </div>
 
-    <!-- Interactive Filter & Search Bar -->
-    <div class="filter-bar">
-      <div class="search-box">
-        <span style="font-size: 1.1rem; color: var(--text-muted);">🔍</span>
-        <input type="text" id="searchInput" placeholder="Search by waste title, type, or generator..." oninput="handleSearchFilter()">
+  <!-- ══════════════════════ FILTER BAR ══════════════════════ -->
+  <div class="filter-bar">
+    <div class="filter-bar-inner">
+      <div class="search-field">
+        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input
+          type="search"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search by title, category, or generator…"
+          oninput="handleSearchFilter()"
+          autocomplete="off"
+        />
       </div>
 
-      <div class="category-chips" id="categoryChips">
-        <button class="chip active" onclick="filterByCategory('all')">All Materials</button>
-        <button class="chip" onclick="filterByCategory('plastic')">🥤 Plastic</button>
-        <button class="chip" onclick="filterByCategory('paper')">📦 Paper &amp; Cardboard</button>
-        <button class="chip" onclick="filterByCategory('metal')">⚙️ Metals</button>
-        <button class="chip" onclick="filterByCategory('glass')">🍾 Glass</button>
-        <button class="chip" onclick="filterByCategory('e-waste')">💻 E-Waste</button>
-        <button class="chip" onclick="filterByCategory('organic')">🍂 Organic</button>
+      <div class="filter-chips" id="categoryChips">
+        <button class="filter-chip active" onclick="filterByCategory('all', this)">All</button>
+        <button class="filter-chip" onclick="filterByCategory('plastic', this)">🥤 Plastic</button>
+        <button class="filter-chip" onclick="filterByCategory('paper', this)">📦 Cardboard</button>
+        <button class="filter-chip" onclick="filterByCategory('metal', this)">⚙️ Metals</button>
+        <button class="filter-chip" onclick="filterByCategory('glass', this)">🍾 Glass</button>
+        <button class="filter-chip" onclick="filterByCategory('e-waste', this)">💻 E-Waste</button>
+        <button class="filter-chip" onclick="filterByCategory('organic', this)">🍂 Organic</button>
+      </div>
+
+      <span class="listings-count-badge">
+        <span id="listingsCount">—</span> listings
+      </span>
+    </div>
+  </div>
+
+  <!-- ══════════════════════ LISTINGS GRID ══════════════════════ -->
+  <main class="page-content">
+    <div id="listingsGrid" class="listings-grid">
+      <div class="empty-state" style="grid-column:1/-1">
+        <div class="empty-state-icon">♻️</div>
+        <p class="empty-state-title">Loading materials…</p>
+        <p class="empty-state-sub">Fetching available waste listings</p>
       </div>
     </div>
+  </main>
 
-    <!-- Active Listings Grid -->
-    <div id="listingsGrid" class="grid grid-3">
-      <!-- Populated via JavaScript Fetch API -->
+  <!-- ══════════════════════ FOOTER ══════════════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <span class="footer-logo">♻ ReLoop</span>
+      <p>A DBMS mini-project · Cloudflare D1 · ACID Transactions · SQL Triggers · SQL Views</p>
     </div>
+  </footer>
 
-    <!-- Modal: Post New Waste Listing (Generators Only) -->
-    <div id="listingModal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>📦 Post Waste Listing</h2>
-          <button type="button" class="modal-close" onclick="closeListingModal()">&times;</button>
-        </div>
+  <!-- ══════════════════════ POST LISTING DIALOG ══════════════════════ -->
+  <div class="dialog-overlay" id="listingModal">
+    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="listingDialogTitle">
+      <div class="dialog-header">
+        <h2 class="dialog-title" id="listingDialogTitle">
+          <span class="dialog-title-icon">📋</span>
+          Post a New Waste Listing
+        </h2>
+        <button class="dialog-close" onclick="closeListingModal()" aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
 
-        <form id="createListingForm">
-          <div class="form-group">
-            <label for="listingTitle">Waste Description / Title</label>
-            <input type="text" id="listingTitle" class="form-control" placeholder="e.g. 50kg Clean Corrugated Cardboard Boxes" required>
+      <div class="dialog-body">
+        <p class="dialog-desc">Fill in the details below. Recyclers will see this listing on the marketplace and can submit exchange requests.</p>
+
+        <form id="createListingForm" novalidate>
+          <div class="form-field">
+            <label class="form-label" for="listingTitle">Listing Title <span class="required">*</span></label>
+            <input
+              type="text"
+              id="listingTitle"
+              class="form-input"
+              placeholder="e.g. Bundled Cardboard Boxes (Flat Pack)"
+              maxlength="120"
+              required
+            />
+            <span class="form-hint">Be descriptive — include material condition and packaging.</span>
           </div>
 
-          <div class="form-group">
-            <label for="listingCategorySelect">Waste Category (EPA CO₂ Factor)</label>
-            <select id="listingCategorySelect" class="form-control" required>
-              <option value="">Loading categories...</option>
-            </select>
+          <div class="form-field">
+            <label class="form-label" for="listingCategorySelect">Material Category <span class="required">*</span></label>
+            <div class="select-wrap">
+              <select id="listingCategorySelect" class="form-input form-select" required>
+                <option value="">— Select a category —</option>
+              </select>
+              <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <span class="form-hint">Category determines the CO₂ offset calculation.</span>
           </div>
 
-          <div class="form-group">
-            <label for="listingWeight">Total Weight (Kilograms)</label>
-            <input type="number" id="listingWeight" class="form-control" placeholder="e.g. 25.5" step="0.1" min="0.5" required>
+          <div class="form-field">
+            <label class="form-label" for="listingWeight">Weight (kg) <span class="required">*</span></label>
+            <div class="input-with-icon">
+              <input
+                type="number"
+                id="listingWeight"
+                class="form-input"
+                placeholder="0.00"
+                min="0.1"
+                max="10000"
+                step="0.1"
+                required
+              />
+              <span class="input-suffix">kg</span>
+            </div>
+            <span class="form-hint">Approximate weight of the waste material.</span>
           </div>
 
-          <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.75rem;">
-            <button type="button" class="btn btn-secondary" onclick="closeListingModal()">Cancel</button>
-            <button type="submit" class="btn btn-primary">Publish to Marketplace</button>
+          <div class="dialog-actions">
+            <button type="button" class="btn btn-outlined" onclick="closeListingModal()">Cancel</button>
+            <button type="submit" class="btn btn-filled-green">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Publish Listing
+            </button>
           </div>
         </form>
       </div>
     </div>
+  </div>
 
-  </main>
-
-  <footer>
-    <p>ReLoop Academic Project &copy; 2026 &bull; Developed with Node.js, Express, mssql, and Azure SQL Database</p>
-  </footer>
-
-  <div id="toast"></div>
+  <!-- ══════════════════════ TOAST STACK ══════════════════════ -->
+  <div class="toast-stack" id="toastStack"></div>
 
   <script src="js/app.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      initMarketplacePage();
-      initListingFormHandler();
-    });
+    initMarketplacePage();
+    initListingFormHandler();
   </script>
 </body>
 </html>

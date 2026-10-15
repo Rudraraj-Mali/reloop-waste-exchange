@@ -3,151 +3,261 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ReLoop | Waste Exchange & Recycling Marketplace</title>
+  <title>ReLoop — Sign In</title>
   <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { background: var(--surface-dim); }
+    .auth-page-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Mini top bar for auth page */
+    .auth-top-bar {
+      height: 64px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 40px;
+    }
+
+    .auth-main {
+      flex: 1;
+      display: grid;
+      place-items: center;
+      padding: 40px 20px;
+    }
+
+    .auth-split {
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      max-width: 1040px;
+      width: 100%;
+      min-height: 620px;
+      background: var(--surface);
+      border-radius: var(--r-xl);
+      overflow: hidden;
+      box-shadow: var(--shadow-3);
+      border: 1px solid var(--border);
+    }
+
+    @media (max-width: 860px) {
+      .auth-split { grid-template-columns: 1fr; }
+      .auth-hero { display: none; }
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
+<div class="auth-page-wrap">
 
-  <!-- Navigation Bar -->
-  <nav class="navbar">
-    <a href="index.html" class="brand">
-      <div class="brand-icon">♻️</div>
-      <span class="brand-text">ReLoop</span>
-      <span class="tagline">Azure SQL &bull; DBMS</span>
+  <!-- Minimal top bar -->
+  <div class="auth-top-bar">
+    <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+      <div class="logo-mark">♻️</div>
+      <span class="app-bar-brand">Re<span class="accent">Loop</span></span>
     </a>
-    <ul class="nav-links">
-      <li><a href="marketplace.html">Browse Marketplace</a></li>
-      <li><a href="dashboard.html">Impact Dashboard</a></li>
-      <li id="navUserSection">
-        <!-- Dynamically rendered -->
-      </li>
-    </ul>
-  </nav>
+  </div>
 
-  <main class="container">
+  <main class="auth-main">
+    <div class="auth-split">
 
-    <!-- Hero Section -->
-    <div class="hero-section">
-      <div class="hero-pill">
-        <span>🌱 Circular Economy Marketplace</span>
-      </div>
-      <h1 class="hero-title">
-        Turn Waste Into Value.<br>
-        <span class="gradient-text">Exchange &amp; Recycle Sustainably.</span>
-      </h1>
-      <p class="hero-subtitle">
-        A platform connecting Waste Generators with certified Recyclers. Engineered as an enterprise database showcase featuring 
-        <strong>ACID Transactions with Row Locking</strong>, <strong>AFTER UPDATE Triggers</strong>, and <strong>Dynamic Analytical Views</strong> in Azure SQL.
-      </p>
-    </div>
-
-    <!-- Academic DBMS Architecture Highlight Banner -->
-    <div class="dbms-info-banner">
-      <h3>🏛️ Enterprise DBMS Concepts Demonstrated</h3>
-      <p>
-        ReLoop enforces core database-level invariants directly in the DBMS engine rather than application code:
-      </p>
-      <div class="dbms-tags">
-        <span class="dbms-tag">🔒 <strong>ACID Concurrency:</strong> <code>WITH (UPDLOCK, ROWLOCK)</code> prevents double-booking</span>
-        <span class="dbms-tag">⚡ <strong>AFTER UPDATE Trigger:</strong> <code>trg_ExchangeRequests_Completed</code> auto-awards +10 eco-points</span>
-        <span class="dbms-tag">📊 <strong>Dynamic SQL View:</strong> <code>UserImpactDashboard</code> computes CO₂ savings &amp; weight diverted</span>
-      </div>
-    </div>
-
-    <!-- Active Session Notification (if already logged in) -->
-    <div id="alreadyLoggedInBanner" style="display: none;"></div>
-
-    <div class="auth-wrapper">
-      <div class="auth-card">
-        <div class="auth-header">
-          <h1>Get Started</h1>
-          <p style="color: var(--text-muted); font-size: 0.92rem;">Sign in or create an account to begin exchanging waste.</p>
+      <!-- Left: Hero Panel -->
+      <div class="auth-hero">
+        <div class="auth-hero-logo">
+          <div class="auth-logo-mark">♻️</div>
+          <div class="auth-hero-brand">ReLoop</div>
         </div>
 
-        <!-- Auth Tabs -->
-        <div class="auth-tabs">
-          <div id="tabLogin" class="auth-tab active">Sign In</div>
-          <div id="tabRegister" class="auth-tab">Create Account</div>
+        <div class="auth-hero-content">
+          <h2>Turn Waste into Value.</h2>
+          <p>
+            A professional-grade circular economy platform connecting Waste Generators
+            with certified Recyclers to divert materials from landfills and measure environmental impact.
+          </p>
+
+          <div class="auth-feature-pills">
+            <div class="auth-pill">
+              <span class="auth-pill-icon">🔒</span>
+              <span><strong>ACID Transactions</strong> with Row Locking — prevents double-booking</span>
+            </div>
+            <div class="auth-pill">
+              <span class="auth-pill-icon">⚡</span>
+              <span><strong>Database Triggers</strong> — auto-awards Eco Points on completion</span>
+            </div>
+            <div class="auth-pill">
+              <span class="auth-pill-icon">📊</span>
+              <span><strong>SQL View</strong> <code style="background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px;font-size:.8rem">UserImpactDashboard</code> — live CO₂ metrics</span>
+            </div>
+          </div>
         </div>
 
-        <!-- 1. LOGIN FORM -->
-        <form id="formLogin">
-          <div class="form-group">
-            <label for="loginEmail">Email Address</label>
-            <input type="email" id="loginEmail" class="form-control" placeholder="user@example.com" required autocomplete="email">
-          </div>
+        <div style="font-size:.8125rem;color:rgba(255,255,255,.5);margin-top:40px;">
+          Cloudflare D1 SQL · Node.js · Express · Vanilla JS
+        </div>
+      </div>
 
-          <div class="form-group">
-            <label for="loginPassword">Password (Academic Plain-Text)</label>
-            <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required autocomplete="current-password">
-          </div>
+      <!-- Right: Form Panel -->
+      <div class="auth-form-panel">
+        <div class="auth-form-header">
+          <h3>Welcome to ReLoop</h3>
+          <p>Sign in to your account or create a new one.</p>
+        </div>
 
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-            Sign In to ReLoop
-          </button>
-        </form>
+        <!-- Segment Tabs -->
+        <div class="segment-control" role="tablist">
+          <button class="segment-btn active" id="tabLogin" onclick="switchTab('login')" role="tab">Sign In</button>
+          <button class="segment-btn" id="tabRegister" onclick="switchTab('register')" role="tab">Create Account</button>
+        </div>
 
-        <!-- 2. REGISTER FORM -->
-        <form id="formRegister" style="display: none;">
-          <div class="form-group">
-            <label for="regName">Full Name / Organization</label>
-            <input type="text" id="regName" class="form-control" placeholder="e.g. Green Leaf Cafe or Metro Recyclers" required>
-          </div>
+        <!-- Sign In Form -->
+        <div id="panelLogin">
+          <form id="formLogin" novalidate>
+            <div class="form-field">
+              <label for="loginEmail">Email address</label>
+              <div class="input-with-icon">
+                <span class="input-icon">✉️</span>
+                <input type="email" id="loginEmail" name="email" placeholder="you@example.com" autocomplete="email" required>
+              </div>
+            </div>
 
-          <div class="form-group">
-            <label for="regEmail">Email Address</label>
-            <input type="email" id="regEmail" class="form-control" placeholder="e.g. green@example.com" required autocomplete="email">
-          </div>
+            <div class="form-field">
+              <label for="loginPassword">Password</label>
+              <div class="input-with-icon">
+                <span class="input-icon">🔑</span>
+                <input type="password" id="loginPassword" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+              </div>
+            </div>
 
-          <div class="form-group">
-            <label for="regPassword">Password (Plain-Text)</label>
-            <input type="password" id="regPassword" class="form-control" placeholder="Create a password" required autocomplete="new-password">
-          </div>
-
-          <div class="form-group">
-            <label for="regUserType">User Role</label>
-            <select id="regUserType" class="form-control" required>
-              <option value="Generator">Waste Generator (Posts waste listings)</option>
-              <option value="Recycler">Recycler (Claims and collects waste)</option>
-            </select>
-          </div>
-
-          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">
-            Create Account
-          </button>
-        </form>
-
-        <!-- Pre-Seeded Demo Accounts with 1-Click Fill -->
-        <div class="demo-credentials-box">
-          <p>🧪 Quick Viva / Demo Accounts (Pre-seeded in <code>database.sql</code>):</p>
-          <div class="demo-cards-grid">
-            <button type="button" class="demo-account-btn" onclick="fillDemoUser('alice@generator.com', 'password123')">
-              <span class="acc-title">🏢 Alice Green</span>
-              <span class="acc-role">Generator (Cafe Owner)</span>
+            <button type="submit" class="btn btn-filled" style="width:100%;margin-top:4px;padding:12px;">
+              Sign In
             </button>
-            <button type="button" class="demo-account-btn" onclick="fillDemoUser('bob@recycler.com', 'password123')">
-              <span class="acc-title">🚚 Bob Clean</span>
-              <span class="acc-role">Recycler (Urban Depot)</span>
-            </button>
+          </form>
+
+          <!-- Demo Accounts -->
+          <div class="demo-strip">
+            <p>🧪 Quick demo sign-in (pre-seeded accounts):</p>
+            <div class="demo-accounts">
+              <button class="demo-btn" onclick="fillDemo('alice@generator.com','password123')">
+                <div class="demo-btn-avatar gen">🏢</div>
+                <div>
+                  <div class="demo-btn-label">Alice Green</div>
+                  <div class="demo-btn-role">Generator</div>
+                </div>
+              </button>
+              <button class="demo-btn" onclick="fillDemo('bob@recycler.com','password123')">
+                <div class="demo-btn-avatar rec">🚚</div>
+                <div>
+                  <div class="demo-btn-label">Bob Clean</div>
+                  <div class="demo-btn-role">Recycler</div>
+                </div>
+              </button>
+            </div>
           </div>
         </div>
 
+        <!-- Create Account Form -->
+        <div id="panelRegister" style="display:none;">
+          <form id="formRegister" novalidate>
+
+            <div class="form-field">
+              <label for="regName">Full name / Organization</label>
+              <input type="text" id="regName" name="name" placeholder="e.g. Green Leaf Café or EcoPlast Recyclers" required>
+            </div>
+
+            <div class="form-field">
+              <label for="regEmail">Email address</label>
+              <div class="input-with-icon">
+                <span class="input-icon">✉️</span>
+                <input type="email" id="regEmail" name="email" placeholder="you@example.com" autocomplete="email" required>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label for="regPassword">Password</label>
+              <div class="input-with-icon">
+                <span class="input-icon">🔑</span>
+                <input type="password" id="regPassword" name="password" placeholder="Create a password" autocomplete="new-password" required>
+              </div>
+              <span class="field-hint">Used for academic plain-text authentication as specified.</span>
+            </div>
+
+            <!-- Role selector as visual cards -->
+            <div class="form-field">
+              <label>Select your role</label>
+              <div class="radio-group">
+                <label class="radio-card selected" id="roleGenCard">
+                  <input type="radio" name="user_type" value="Generator" id="roleGen" checked>
+                  <span class="radio-icon">🏭</span>
+                  <span class="radio-title">Generator</span>
+                  <span class="radio-desc">I produce waste materials and want to post listings.</span>
+                </label>
+                <label class="radio-card" id="roleRecCard">
+                  <input type="radio" name="user_type" value="Recycler" id="roleRec">
+                  <span class="radio-icon">♻️</span>
+                  <span class="radio-title">Recycler</span>
+                  <span class="radio-desc">I collect and process recyclable materials.</span>
+                </label>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-filled" style="width:100%;padding:12px;">
+              Create Account
+            </button>
+          </form>
+        </div>
+
+        <!-- Session Banner (if already logged in) -->
+        <div id="sessionBanner" style="display:none;margin-top:20px;"></div>
       </div>
+
     </div>
   </main>
 
-  <footer>
-    <p>ReLoop Academic Project &copy; 2026 &bull; Developed with Node.js, Express, mssql, and Azure SQL Database</p>
-  </footer>
+</div>
 
-  <div id="toast"></div>
+<div class="toast-stack" id="toastStack"></div>
 
-  <script src="js/app.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      initAuthPage();
-      updateNavbar();
+<script src="js/app.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    updateNavbar && updateNavbar();
+    initAuthPage();
+
+    // Radio card styling
+    document.querySelectorAll('.radio-card input[type="radio"]').forEach(radio => {
+      radio.addEventListener('change', () => {
+        document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
+        radio.closest('.radio-card').classList.add('selected');
+      });
     });
-  </script>
+  });
+
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+    document.getElementById('panelLogin').style.display = isLogin ? 'block' : 'none';
+    document.getElementById('panelRegister').style.display = isLogin ? 'none' : 'block';
+  }
+
+  function fillDemo(email, pass) {
+    switchTab('login');
+    document.getElementById('loginEmail').value = email;
+    document.getElementById('loginPassword').value = pass;
+    showToast('Demo credentials loaded — click Sign In!', 'info');
+  }
+</script>
 </body>
 </html>
