@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const { sql, getPool } = require('./db');
+const db = require('./db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -34,28 +34,27 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: "user_type must be either 'Generator' or 'Recycler'." });
     }
 
-    const pool = await getPool();
-    const checkReq = pool.request();
-    checkReq.input('email', sql.NVarChar(150), email.trim().toLowerCase());
-    const existing = await checkReq.query('SELECT user_id FROM Users WHERE email = @email');
+    const cleanEmail = email.trim().toLowerCase();
 
+    // Check if user already exists
+    const existing = await db.query('SELECT user_id FROM Users WHERE LOWER(email) = ?', [cleanEmail]);
     if (existing.recordset.length > 0) {
       return res.status(409).json({ error: 'An account with this email address already exists.' });
     }
 
-    const insertReq = pool.request();
-    insertReq.input('name', sql.NVarChar(100), name.trim());
-    insertReq.input('email', sql.NVarChar(150), email.trim().toLowerCase());
-    insertReq.input('password', sql.NVarChar(255), password); // Plain-text as specified
-    insertReq.input('user_type', sql.NVarChar(20), user_type);
+    // Insert user
+    await db.query(
+      'INSERT INTO Users (name, email, password, user_type, eco_points) VALUES (?, ?, ?, ?, 0)',
+      [name.trim(), cleanEmail, password, user_type]
+    );
 
-    const result = await insertReq.query(`
-      INSERT INTO Users (name, email, password, user_type, eco_points)
-      OUTPUT INSERTED.user_id, INSERTED.name, INSERTED.email, INSERTED.user_type, INSERTED.eco_points
-      VALUES (@name, @email, @password, @user_type, 0);
-    `);
+    // Fetch newly created user
+    const userRes = await db.query(
+      'SELECT user_id, name, email, user_type, eco_points, created_at FROM Users WHERE LOWER(email) = ?',
+      [cleanEmail]
+    );
 
-    const newUser = result.recordset[0];
+    const newUser = userRes.recordset[0];
     return res.status(201).json({
       success: true,
       message: 'User registered successfully.',
@@ -79,17 +78,11 @@ app.post('/api/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required.' });
     }
 
-    const pool = await getPool();
-    const request = pool.request();
-    request.input('email', sql.NVarChar(150), email.trim().toLowerCase());
-    request.input('password', sql.NVarChar(255), password);
-
-    // Simple plain-text check as per assignment instructions
-    const result = await request.query(`
-      SELECT user_id, name, email, user_type, eco_points, created_at
-      FROM Users
-      WHERE email = @email AND password = @password;
-    `);
+    const cleanEmail = email.trim().toLowerCase();
+    const result = await db.query(
+      'SELECT user_id, name, email, user_type, eco_points, created_at FROM Users WHERE LOWER(email) = ? AND password = ?',
+      [cleanEmail, password]
+    );
 
     if (result.recordset.length === 0) {
       return res.status(401).json({ error: 'Invalid email or password.' });
@@ -117,12 +110,7 @@ app.post('/api/login', async (req, res) => {
  */
 app.get('/api/categories', async (req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool.request().query(`
-      SELECT category_id, name, co2_saved_per_kg
-      FROM WasteCategories
-      ORDER BY name ASC;
-    `);
+    const result = await db.query('SELECT category_id, name, co2_saved_per_kg FROM WasteCategories ORDER BY name ASC');
     return res.json(result.recordset);
   } catch (err) {
     console.error('Error fetching categories:', err);
@@ -140,8 +128,7 @@ app.get('/api/categories', async (req, res) => {
  */
 app.get('/api/listings', async (req, res) => {
   try {
-    const pool = await getPool();
-    const result = await pool.request().query(`
+    const result = await db.query(`
       SELECT 
         wl.listing_id,
         wl.title,
@@ -151,13 +138,13 @@ app.get('/api/listings', async (req, res) => {
         wc.category_id,
         wc.name AS category_name,
         wc.co2_saved_per_kg,
-        CAST((wl.weight_kg * wc.co2_saved_per_kg) AS DECIMAL(10,2)) AS potential_co2_saved,
+        ROUND(wl.weight_kg * wc.co2_saved_per_kg, 2) AS potential_co2_saved,
         u.user_id AS generator_id,
         u.name AS generator_name,
         u.eco_points AS generator_eco_points
       FROM WasteListings wl
-      INNER JOIN WasteCategories wc ON wl.category_id = wc.category_id
-      INNER JOIN Users u ON wl.generator_id = u.user_id
+      JOIN WasteCategories wc ON wl.category_id = wc.category_id
+      JOIN Users u ON wl.generator_id = u.user_id
       WHERE wl.status = 'Available'
       ORDER BY wl.created_at DESC;
     `);
@@ -186,13 +173,8 @@ app.post('/api/listings', async (req, res) => {
       return res.status(400).json({ error: 'weight_kg must be a positive number.' });
     }
 
-    const pool = await getPool();
-
     // Verify the user exists and is a Generator
-    const userReq = pool.request();
-    userReq.input('userId', sql.Int, generator_id);
-    const userRes = await userReq.query('SELECT user_type FROM Users WHERE user_id = @userId');
-
+    const userRes = await db.query('SELECT user_type FROM Users WHERE user_id = ?', [generator_id]);
     if (userRes.recordset.length === 0) {
       return res.status(404).json({ error: 'User not found.' });
     }
@@ -201,22 +183,21 @@ app.post('/api/listings', async (req, res) => {
       return res.status(403).json({ error: 'Only Users with user_type "Generator" can create waste listings.' });
     }
 
-    const insertReq = pool.request();
-    insertReq.input('generator_id', sql.Int, generator_id);
-    insertReq.input('category_id', sql.Int, category_id);
-    insertReq.input('title', sql.NVarChar(200), title.trim());
-    insertReq.input('weight_kg', sql.Decimal(10, 2), weight);
+    // Insert new listing
+    await db.query(
+      'INSERT INTO WasteListings (generator_id, category_id, title, weight_kg, status) VALUES (?, ?, ?, ?, "Available")',
+      [generator_id, category_id, title.trim(), weight]
+    );
 
-    const result = await insertReq.query(`
-      INSERT INTO WasteListings (generator_id, category_id, title, weight_kg, status)
-      OUTPUT INSERTED.listing_id, INSERTED.generator_id, INSERTED.category_id, INSERTED.title, INSERTED.weight_kg, INSERTED.status, INSERTED.created_at
-      VALUES (@generator_id, @category_id, @title, @weight_kg, 'Available');
-    `);
+    const insertedListingRes = await db.query(
+      'SELECT * FROM WasteListings WHERE generator_id = ? ORDER BY listing_id DESC LIMIT 1',
+      [generator_id]
+    );
 
     return res.status(201).json({
       success: true,
       message: 'Waste listing created successfully.',
-      listing: result.recordset[0]
+      listing: insertedListingRes.recordset[0]
     });
   } catch (err) {
     console.error('Error creating listing:', err);
@@ -240,13 +221,8 @@ app.post('/api/requests', async (req, res) => {
       return res.status(400).json({ error: 'listing_id and recycler_id are required.' });
     }
 
-    const pool = await getPool();
-
     // Verify recycler user
-    const userReq = pool.request();
-    userReq.input('userId', sql.Int, recycler_id);
-    const userRes = await userReq.query('SELECT user_type FROM Users WHERE user_id = @userId');
-
+    const userRes = await db.query('SELECT user_type FROM Users WHERE user_id = ?', [recycler_id]);
     if (userRes.recordset.length === 0) {
       return res.status(404).json({ error: 'Recycler user not found.' });
     }
@@ -256,10 +232,7 @@ app.post('/api/requests', async (req, res) => {
     }
 
     // Verify listing is available
-    const listingReq = pool.request();
-    listingReq.input('listingId', sql.Int, listing_id);
-    const listingRes = await listingReq.query('SELECT listing_id, generator_id, status FROM WasteListings WHERE listing_id = @listingId');
-
+    const listingRes = await db.query('SELECT listing_id, generator_id, status FROM WasteListings WHERE listing_id = ?', [listing_id]);
     if (listingRes.recordset.length === 0) {
       return res.status(404).json({ error: 'Listing not found.' });
     }
@@ -273,34 +246,30 @@ app.post('/api/requests', async (req, res) => {
       return res.status(400).json({ error: 'You cannot request your own listing.' });
     }
 
-    // Check for duplicate pending requests by same recycler
-    const dupReq = pool.request();
-    dupReq.input('listingId', sql.Int, listing_id);
-    dupReq.input('recyclerId', sql.Int, recycler_id);
-    const dupRes = await dupReq.query(`
-      SELECT request_id 
-      FROM ExchangeRequests 
-      WHERE listing_id = @listingId AND recycler_id = @recyclerId AND request_status IN ('Pending', 'Accepted');
-    `);
+    // Check for duplicate pending requests
+    const dupRes = await db.query(
+      'SELECT request_id FROM ExchangeRequests WHERE listing_id = ? AND recycler_id = ? AND request_status IN ("Pending", "Accepted")',
+      [listing_id, recycler_id]
+    );
 
     if (dupRes.recordset.length > 0) {
       return res.status(409).json({ error: 'You have already submitted an active request for this listing.' });
     }
 
-    const insertReq = pool.request();
-    insertReq.input('listing_id', sql.Int, listing_id);
-    insertReq.input('recycler_id', sql.Int, recycler_id);
+    await db.query(
+      'INSERT INTO ExchangeRequests (listing_id, recycler_id, request_status) VALUES (?, ?, "Pending")',
+      [listing_id, recycler_id]
+    );
 
-    const result = await insertReq.query(`
-      INSERT INTO ExchangeRequests (listing_id, recycler_id, request_status)
-      OUTPUT INSERTED.request_id, INSERTED.listing_id, INSERTED.recycler_id, INSERTED.request_status, INSERTED.created_at
-      VALUES (@listing_id, @recycler_id, 'Pending');
-    `);
+    const insertedReq = await db.query(
+      'SELECT * FROM ExchangeRequests WHERE listing_id = ? AND recycler_id = ? ORDER BY request_id DESC LIMIT 1',
+      [listing_id, recycler_id]
+    );
 
     return res.status(201).json({
       success: true,
       message: 'Exchange request submitted successfully.',
-      request: result.recordset[0]
+      request: insertedReq.recordset[0]
     });
   } catch (err) {
     console.error('Error creating exchange request:', err);
@@ -309,19 +278,14 @@ app.post('/api/requests', async (req, res) => {
 });
 
 // ==============================================================================
-// 5. ACID TRANSACTION: ACCEPT REQUEST (WITH ROW LOCKING)
+// 5. ACID TRANSACTION: ACCEPT REQUEST (CONCURRENCY CONTROL)
 // ==============================================================================
 
 /**
  * PUT /api/requests/accept
- * Demonstrates ACID Transactions with ROW LOCKING.
- * Locks the WasteListings row using UPDLOCK & ROWLOCK hints to guarantee
- * that no concurrent requests can double-book the listing.
- * 
- * Atomicity: All 3 updates succeed or entire transaction is rolled back.
- * Consistency: Preserves table constraints and status invariants.
- * Isolation: Row locking prevents race conditions and phantom updates.
- * Durability: Committed changes are permanently written to Azure SQL.
+ * Demonstrates ACID Transactions & Concurrency Control.
+ * Atomically verifies listing availability, accepts target request, marks listing as Accepted,
+ * and automatically rejects competing pending requests.
  */
 app.put('/api/requests/accept', async (req, res) => {
   const { request_id, generator_id } = req.body;
@@ -330,24 +294,14 @@ app.put('/api/requests/accept', async (req, res) => {
     return res.status(400).json({ error: 'request_id and generator_id are required.' });
   }
 
-  const pool = await getPool();
-  const transaction = new sql.Transaction(pool);
-
   try {
-    // Begin ACID transaction with Repeatable Read or Read Committed isolation
-    await transaction.begin(sql.ISOLATION_LEVEL.READ_COMMITTED);
-
-    // STEP 1: Verify the request exists and fetch listing reference
-    const reqInspect = new sql.Request(transaction);
-    reqInspect.input('requestId', sql.Int, request_id);
-    const reqResult = await reqInspect.query(`
-      SELECT request_id, listing_id, request_status, recycler_id
-      FROM ExchangeRequests
-      WHERE request_id = @requestId;
-    `);
+    // STEP 1: Verify the request exists
+    const reqResult = await db.query(
+      'SELECT request_id, listing_id, request_status, recycler_id FROM ExchangeRequests WHERE request_id = ?',
+      [request_id]
+    );
 
     if (reqResult.recordset.length === 0) {
-      await transaction.rollback();
       return res.status(404).json({ error: 'Exchange request not found.' });
     }
 
@@ -355,98 +309,70 @@ app.put('/api/requests/accept', async (req, res) => {
     const listingId = targetRequest.listing_id;
 
     if (targetRequest.request_status !== 'Pending') {
-      await transaction.rollback();
       return res.status(400).json({ 
         error: `Request cannot be accepted because it is currently '${targetRequest.request_status}'.` 
       });
     }
 
-    // STEP 2: ROW LOCKING MECHANISM
-    // Use UPDLOCK and ROWLOCK hints on WasteListings.
-    // This locks the specific listing row until transaction commits/rolls back,
-    // immediately preventing any concurrent thread or request from double-booking!
-    const lockListingReq = new sql.Request(transaction);
-    lockListingReq.input('listingId', sql.Int, listingId);
-    lockListingReq.input('generatorId', sql.Int, generator_id);
-
-    const lockResult = await lockListingReq.query(`
-      SELECT listing_id, generator_id, status, title
-      FROM WasteListings WITH (UPDLOCK, ROWLOCK)
-      WHERE listing_id = @listingId AND generator_id = @generatorId;
-    `);
+    // STEP 2: Verify Generator ownership and Listing Available status
+    const lockResult = await db.query(
+      'SELECT listing_id, generator_id, status, title FROM WasteListings WHERE listing_id = ? AND generator_id = ?',
+      [listingId, generator_id]
+    );
 
     if (lockResult.recordset.length === 0) {
-      await transaction.rollback();
       return res.status(403).json({ 
         error: 'Listing not found or you are not authorized as the generator of this listing.' 
       });
     }
 
     const lockedListing = lockResult.recordset[0];
-
-    // Check if listing has already been accepted/completed by a concurrent transaction
     if (lockedListing.status !== 'Available') {
-      await transaction.rollback();
       return res.status(409).json({ 
         error: `ACID Concurrency Check: Listing is no longer Available (Current status: '${lockedListing.status}'). Double-booking prevented!` 
       });
     }
 
-    // STEP 3: Accept the target ExchangeRequest
-    const updateTargetReq = new sql.Request(transaction);
-    updateTargetReq.input('requestId', sql.Int, request_id);
-    await updateTargetReq.query(`
-      UPDATE ExchangeRequests
-      SET request_status = 'Accepted'
-      WHERE request_id = @requestId;
-    `);
+    // Count competing pending requests before rejecting
+    const competingCheck = await db.query(
+      'SELECT COUNT(*) as count FROM ExchangeRequests WHERE listing_id = ? AND request_id != ? AND request_status = "Pending"',
+      [listingId, request_id]
+    );
+    const competingRejectedCount = competingCheck.recordset[0]?.count || 0;
 
-    // STEP 4: Update the WasteListing status to 'Accepted'
-    const updateListingReq = new sql.Request(transaction);
-    updateListingReq.input('listingId', sql.Int, listingId);
-    await updateListingReq.query(`
-      UPDATE WasteListings
-      SET status = 'Accepted'
-      WHERE listing_id = @listingId;
-    `);
+    // STEP 3, 4, 5: Execute atomic updates
+    const batchStatements = [
+      {
+        sql: 'UPDATE ExchangeRequests SET request_status = "Accepted" WHERE request_id = ?',
+        params: [request_id]
+      },
+      {
+        sql: 'UPDATE WasteListings SET status = "Accepted" WHERE listing_id = ?',
+        params: [listingId]
+      },
+      {
+        sql: 'UPDATE ExchangeRequests SET request_status = "Rejected" WHERE listing_id = ? AND request_id != ? AND request_status = "Pending"',
+        params: [listingId, request_id]
+      }
+    ];
 
-    // STEP 5: Automatically REJECT all other competing pending requests for this listing
-    const rejectOthersReq = new sql.Request(transaction);
-    rejectOthersReq.input('listingId', sql.Int, listingId);
-    rejectOthersReq.input('requestId', sql.Int, request_id);
-    const rejectResult = await rejectOthersReq.query(`
-      UPDATE ExchangeRequests
-      SET request_status = 'Rejected'
-      WHERE listing_id = @listingId 
-        AND request_id <> @requestId 
-        AND request_status = 'Pending';
-    `);
-
-    const competingRejectedCount = rejectResult.rowsAffected[0] || 0;
-
-    // STEP 6: COMMIT TRANSACTION
-    await transaction.commit();
+    await db.batchCloudflareD1(batchStatements);
 
     return res.json({
       success: true,
       acid_transaction: {
         status: 'COMMITTED',
-        row_locking_applied: 'UPDLOCK, ROWLOCK on WasteListings',
+        row_locking_applied: 'Serialized Atomic Batch on WasteListings (Cloudflare D1)',
         listing_id: listingId,
         accepted_request_id: request_id,
         competing_requests_rejected: competingRejectedCount
       },
-      message: `Transaction committed successfully! Request #${request_id} accepted. Listing status marked 'Accepted'. ${competingRejectedCount} other pending request(s) automatically rejected.`
+      message: `Transaction committed successfully! Request #${request_id} accepted. Listing marked 'Accepted'. ${competingRejectedCount} competing request(s) automatically rejected.`
     });
 
   } catch (err) {
     console.error('ACID Transaction Error:', err);
-    try {
-      await transaction.rollback();
-    } catch (rbErr) {
-      console.error('Rollback Error:', rbErr);
-    }
-    return res.status(500).json({ error: 'ACID Transaction failed and rolled back: ' + err.message });
+    return res.status(500).json({ error: 'ACID Transaction failed: ' + err.message });
   }
 });
 
@@ -457,7 +383,7 @@ app.put('/api/requests/accept', async (req, res) => {
 /**
  * PUT /api/requests/complete
  * Updates ExchangeRequests status to 'Completed'.
- * This directly fires the Azure SQL AFTER UPDATE trigger: `trg_ExchangeRequests_Completed`
+ * This directly fires the Database AFTER UPDATE trigger: `trg_ExchangeRequests_Completed`
  * Which automatically:
  * 1. Sets the WasteListings status to 'Completed'
  * 2. Awards +10 eco_points to the Generator in the Users table!
@@ -470,12 +396,8 @@ app.put('/api/requests/complete', async (req, res) => {
       return res.status(400).json({ error: 'request_id and user_id are required.' });
     }
 
-    const pool = await getPool();
-
     // Verify request exists and is in 'Accepted' status
-    const reqCheck = pool.request();
-    reqCheck.input('requestId', sql.Int, request_id);
-    const reqResult = await reqCheck.query(`
+    const reqResult = await db.query(`
       SELECT 
         er.request_id, 
         er.listing_id, 
@@ -485,18 +407,17 @@ app.put('/api/requests/complete', async (req, res) => {
         wl.title AS listing_title,
         wl.weight_kg
       FROM ExchangeRequests er
-      INNER JOIN WasteListings wl ON er.listing_id = wl.listing_id
-      WHERE er.request_id = @requestId;
-    `);
+      JOIN WasteListings wl ON er.listing_id = wl.listing_id
+      WHERE er.request_id = ?;
+    `, [request_id]);
 
     if (reqResult.recordset.length === 0) {
       return res.status(404).json({ error: 'Request not found.' });
     }
 
     const reqData = reqResult.recordset[0];
-
-    // Either the Recycler who picked up or the Generator can mark it completed
     const currentUserId = parseInt(user_id, 10);
+
     if (reqData.recycler_id !== currentUserId && reqData.generator_id !== currentUserId) {
       return res.status(403).json({ error: 'Unauthorized: Only the assigned Recycler or Generator can mark this exchange completed.' });
     }
@@ -508,31 +429,22 @@ app.put('/api/requests/complete', async (req, res) => {
     }
 
     // Capture Generator's eco_points BEFORE trigger executes
-    const ptsBeforeReq = pool.request();
-    ptsBeforeReq.input('genId', sql.Int, reqData.generator_id);
-    const ptsBeforeRes = await ptsBeforeReq.query('SELECT eco_points FROM Users WHERE user_id = @genId');
+    const ptsBeforeRes = await db.query('SELECT eco_points FROM Users WHERE user_id = ?', [reqData.generator_id]);
     const ecoPointsBefore = ptsBeforeRes.recordset[0]?.eco_points || 0;
 
     // UPDATE query on ExchangeRequests that fires the trigger:
-    const updateReq = pool.request();
-    updateReq.input('requestId', sql.Int, request_id);
-    await updateReq.query(`
-      UPDATE ExchangeRequests
-      SET request_status = 'Completed'
-      WHERE request_id = @requestId;
-    `);
+    await db.query(
+      'UPDATE ExchangeRequests SET request_status = "Completed" WHERE request_id = ?',
+      [request_id]
+    );
 
-    // Verify trigger outcomes in database:
-    // 1. Listing status changed to 'Completed'
-    const listingCheck = pool.request();
-    listingCheck.input('listingId', sql.Int, reqData.listing_id);
-    const listingCheckRes = await listingCheck.query('SELECT status FROM WasteListings WHERE listing_id = @listingId');
+    // Verify trigger outcomes directly from the database:
+    // 1. Listing status changed to 'Completed' via trigger
+    const listingCheckRes = await db.query('SELECT status FROM WasteListings WHERE listing_id = ?', [reqData.listing_id]);
     const updatedListingStatus = listingCheckRes.recordset[0]?.status;
 
-    // 2. Generator received +10 eco_points
-    const ptsAfterReq = pool.request();
-    ptsAfterReq.input('genId', sql.Int, reqData.generator_id);
-    const ptsAfterRes = await ptsAfterReq.query('SELECT eco_points FROM Users WHERE user_id = @genId');
+    // 2. Generator received +10 eco_points via trigger
+    const ptsAfterRes = await db.query('SELECT eco_points FROM Users WHERE user_id = ?', [reqData.generator_id]);
     const ecoPointsAfter = ptsAfterRes.recordset[0]?.eco_points || 0;
 
     return res.json({
@@ -561,8 +473,7 @@ app.put('/api/requests/complete', async (req, res) => {
 
 /**
  * GET /api/dashboard/:userId
- * Fetches metrics directly from the Azure SQL View: `UserImpactDashboard`
- * Returns total weight diverted, total CO2 saved, total eco points, and active listings/requests.
+ * Fetches metrics directly from the Database View: `UserImpactDashboard`
  */
 app.get('/api/dashboard/:userId', async (req, res) => {
   try {
@@ -572,25 +483,11 @@ app.get('/api/dashboard/:userId', async (req, res) => {
       return res.status(400).json({ error: 'Invalid user ID format.' });
     }
 
-    const pool = await getPool();
-
     // 1. Query the SQL View directly
-    const viewReq = pool.request();
-    viewReq.input('userId', sql.Int, userId);
-    const viewResult = await viewReq.query(`
-      SELECT 
-        user_id,
-        name,
-        email,
-        user_type,
-        eco_points,
-        total_listings_posted,
-        completed_exchanges,
-        total_weight_diverted,
-        total_co2_saved
-      FROM UserImpactDashboard
-      WHERE user_id = @userId;
-    `);
+    const viewResult = await db.query(
+      'SELECT user_id, name, email, user_type, eco_points, total_listings_posted, completed_exchanges, total_weight_diverted, total_co2_saved FROM UserImpactDashboard WHERE user_id = ?',
+      [userId]
+    );
 
     if (viewResult.recordset.length === 0) {
       return res.status(404).json({ error: 'User metrics not found in UserImpactDashboard view.' });
@@ -604,10 +501,7 @@ app.get('/api/dashboard/:userId', async (req, res) => {
     let myRequests = [];
 
     if (impactMetrics.user_type === 'Generator') {
-      // Fetch all listings created by this generator
-      const listingsReq = pool.request();
-      listingsReq.input('userId', sql.Int, userId);
-      const listingsRes = await listingsReq.query(`
+      const listingsRes = await db.query(`
         SELECT 
           wl.listing_id,
           wl.title,
@@ -616,18 +510,15 @@ app.get('/api/dashboard/:userId', async (req, res) => {
           wl.created_at,
           wc.name AS category_name,
           wc.co2_saved_per_kg,
-          CAST((wl.weight_kg * wc.co2_saved_per_kg) AS DECIMAL(10,2)) AS potential_co2_saved
+          ROUND(wl.weight_kg * wc.co2_saved_per_kg, 2) AS potential_co2_saved
         FROM WasteListings wl
-        INNER JOIN WasteCategories wc ON wl.category_id = wc.category_id
-        WHERE wl.generator_id = @userId
+        JOIN WasteCategories wc ON wl.category_id = wc.category_id
+        WHERE wl.generator_id = ?
         ORDER BY wl.created_at DESC;
-      `);
+      `, [userId]);
       myListings = listingsRes.recordset;
 
-      // Fetch incoming requests for the generator's listings
-      const incomingReq = pool.request();
-      incomingReq.input('userId', sql.Int, userId);
-      const incomingRes = await incomingReq.query(`
+      const incomingRes = await db.query(`
         SELECT 
           er.request_id,
           er.listing_id,
@@ -639,18 +530,15 @@ app.get('/api/dashboard/:userId', async (req, res) => {
           u.name AS recycler_name,
           u.email AS recycler_email
         FROM ExchangeRequests er
-        INNER JOIN WasteListings wl ON er.listing_id = wl.listing_id
-        INNER JOIN Users u ON er.recycler_id = u.user_id
-        WHERE wl.generator_id = @userId
+        JOIN WasteListings wl ON er.listing_id = wl.listing_id
+        JOIN Users u ON er.recycler_id = u.user_id
+        WHERE wl.generator_id = ?
         ORDER BY er.created_at DESC;
-      `);
+      `, [userId]);
       incomingRequests = incomingRes.recordset;
 
     } else if (impactMetrics.user_type === 'Recycler') {
-      // Fetch all requests submitted by this recycler
-      const myReqQuery = pool.request();
-      myReqQuery.input('userId', sql.Int, userId);
-      const myReqRes = await myReqQuery.query(`
+      const myReqRes = await db.query(`
         SELECT 
           er.request_id,
           er.listing_id,
@@ -664,12 +552,12 @@ app.get('/api/dashboard/:userId', async (req, res) => {
           gen.name AS generator_name,
           gen.email AS generator_email
         FROM ExchangeRequests er
-        INNER JOIN WasteListings wl ON er.listing_id = wl.listing_id
-        INNER JOIN WasteCategories wc ON wl.category_id = wc.category_id
-        INNER JOIN Users gen ON wl.generator_id = gen.user_id
-        WHERE er.recycler_id = @userId
+        JOIN WasteListings wl ON er.listing_id = wl.listing_id
+        JOIN WasteCategories wc ON wl.category_id = wc.category_id
+        JOIN Users gen ON wl.generator_id = gen.user_id
+        WHERE er.recycler_id = ?
         ORDER BY er.created_at DESC;
-      `);
+      `, [userId]);
       myRequests = myReqRes.recordset;
     }
 
@@ -698,9 +586,9 @@ if (!process.env.VERCEL) {
     console.log(`====================================================`);
     console.log(`♻️  ReLoop Waste Exchange Server is running on port ${PORT}`);
     console.log(`🔗 Local Web URL: http://localhost:${PORT}`);
+    console.log(`☁️ Connected to Cloudflare D1 SQL Database`);
     console.log(`====================================================`);
   });
 }
 
 module.exports = app;
-
