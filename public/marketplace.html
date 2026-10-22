@@ -1,170 +1,554 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Marketplace — ReLoop</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-2: #6b7280;
+      --text-3: #9ca3af;
+      --primary: #16a34a;
+      --primary-dark: #15803d;
+      --primary-light: #f0fdf4;
+      --primary-border: #bbf7d0;
+      --blue: #2563eb;
+      --blue-light: #eff6ff;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+      --shadow: 0 1px 3px rgba(0,0,0,.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+      --r: 10px;
+      --r-lg: 14px;
+    }
+    html, body { height: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Navbar ── */
+    .navbar {
+      height: 56px;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 24px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      color: var(--text);
+      margin-right: 8px;
+    }
+    .nav-logo-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #16a34a, #2563eb);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo-text {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+    }
+    .nav-logo-text span { color: var(--primary); }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      flex: 1;
+    }
+    .nav-link {
+      padding: 6px 14px;
+      border-radius: 7px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-2);
+      text-decoration: none;
+      transition: all .15s;
+    }
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+    .nav-link.active { color: var(--primary); background: var(--primary-light); font-weight: 600; }
+    .nav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+    /* User chip */
+    .user-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px 5px 6px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--surface);
+      cursor: default;
+    }
+    .user-av {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .user-chip-info { line-height: 1.2; }
+    .user-chip-name { font-size: 0.8125rem; font-weight: 600; color: var(--text); }
+    .user-chip-role { font-size: 0.6875rem; color: var(--text-3); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: all .15s;
+      text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); border-color: #d1d5db; background: var(--bg); }
+    .btn-sm { padding: 5px 12px; font-size: 0.8125rem; }
+    .btn-danger { background: var(--red-light); color: var(--red); border: 1px solid #fecaca; }
+    .btn-danger:hover { background: #fee2e2; }
+
+    /* ── Page header ── */
+    .page-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 32px;
+    }
+    .page-header-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .page-title { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.4px; }
+    .page-sub { font-size: 0.875rem; color: var(--text-2); margin-top: 3px; }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 32px;
+      position: sticky;
+      top: 56px;
+      z-index: 90;
+    }
+    .filter-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
+    .search-wrap svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 8px 14px 8px 38px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      background: var(--bg);
+      color: var(--text);
+      outline: none;
+      transition: all .15s;
+    }
+    .search-input:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(22,163,74,.08); }
+    .search-input::placeholder { color: var(--text-3); }
+
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip {
+      padding: 5px 13px;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .chip:hover { border-color: var(--primary); color: var(--primary); }
+    .chip.active { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+
+    .count-badge { font-size: 0.8125rem; color: var(--text-3); margin-left: auto; white-space: nowrap; }
+
+    /* ── Content ── */
+    .content { max-width: 1240px; margin: 0 auto; padding: 28px 32px; flex: 1; width: 100%; }
+
+    /* ── Listings grid ── */
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .listing-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow .15s, border-color .15s, transform .15s;
+    }
+    .listing-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #d1d5db;
+      transform: translateY(-1px);
+    }
+    .listing-card-body { padding: 18px 18px 14px; flex: 1; }
+    .listing-card-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cat-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-2);
+    }
+    .weight-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-2);
+    }
+    .listing-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      line-height: 1.4;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .listing-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .stat-item { }
+    .stat-label { font-size: 0.6875rem; text-transform: uppercase; letter-spacing: .5px; font-weight: 500; color: var(--text-3); }
+    .stat-val { font-size: 0.875rem; font-weight: 500; color: var(--text); margin-top: 1px; }
+    .stat-val.green { color: var(--primary); }
+
+    .listing-card-footer {
+      padding: 12px 18px 18px;
+      border-top: 1px solid var(--border);
+    }
+    .listing-card-footer .btn { width: 100%; justify-content: center; }
+    .own-badge {
+      width: 100%;
+      text-align: center;
+      padding: 7px;
+      background: var(--bg);
+      border-radius: 7px;
+      font-size: 0.8125rem;
+      color: var(--text-3);
+      font-weight: 500;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--r-lg);
+    }
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state-title { font-size: 1.0625rem; font-weight: 600; margin-bottom: 6px; }
+    .empty-state-sub { font-size: 0.875rem; color: var(--text-2); }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.4);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+      animation: modalIn .18s ease;
+    }
+    @keyframes modalIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 22px 0;
+    }
+    .modal-title { font-size: 1.0625rem; font-weight: 700; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-3);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-close:hover { background: var(--bg); color: var(--text); }
+    .modal-body { padding: 16px 22px 22px; }
+    .modal-sub { font-size: 0.875rem; color: var(--text-2); margin-bottom: 18px; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 0.8125rem; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+    .field label .req { color: var(--red); }
+    .field input, .field select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: all .15s;
+      appearance: none;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(22,163,74,.08);
+    }
+    .field input::placeholder { color: var(--text-3); }
+    .field .hint { font-size: 0.75rem; color: var(--text-3); margin-top: 4px; }
+
+    .select-wrap { position: relative; }
+    .select-wrap svg {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-3);
+    }
+    .select-wrap select { padding-right: 32px; }
+
+    /* ── Toast ── */
+    .toast-stack { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast {
+      display: flex; align-items: center; gap: 10px; padding: 11px 14px;
+      border-radius: 10px; font-size: 0.875rem; font-weight: 500; color: #fff;
+      min-width: 220px; max-width: 360px; box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      pointer-events: auto; opacity: 0; transform: translateY(8px); transition: all .25s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.hide { opacity: 0; transform: translateY(8px); }
+    .toast-success { background: #15803d; }
+    .toast-error   { background: #b91c1c; }
+    .toast-info    { background: #1d4ed8; }
+    .toast-msg { flex: 1; }
+    .toast-x { background: none; border: none; color: rgba(255,255,255,.7); cursor: pointer; font-size: 0.875rem; }
+
+    /* ── Footer ── */
+    .site-footer {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 16px 32px;
+    }
+    .footer-inner {
+      max-width: 1240px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .footer-logo { font-size: 0.875rem; font-weight: 700; color: var(--text); }
+    .footer-logo span { color: var(--primary); }
+    .footer-meta { font-size: 0.8125rem; color: var(--text-3); }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 0 16px; }
+      .page-header, .filter-bar { padding-left: 16px; padding-right: 16px; }
+      .content { padding: 20px 16px; }
+      .listings-grid { grid-template-columns: 1fr; }
+      .footer-inner { padding: 0; }
+    }
+    @media (max-width: 560px) {
+      .nav-links { display: none; }
+      .chips { overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ══════════════════════ TOP APP BAR ══════════════════════ -->
-  <header class="app-bar">
-    <div class="app-bar-inner">
-      <a href="marketplace.html" class="app-bar-brand">
-        <span class="logo-mark">♻</span>
-        <span>ReLoop</span>
-      </a>
-
-      <nav class="app-bar-nav">
-        <a href="marketplace.html" class="nav-link active">Marketplace</a>
-        <a href="dashboard.html" class="nav-link">Dashboard</a>
-      </nav>
-
-      <div id="navUserSection" class="app-bar-actions">
-        <!-- Injected by app.js -->
-      </div>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="marketplace.html" class="nav-logo">
+      <div class="nav-logo-icon">RL</div>
+      <span class="nav-logo-text">Re<span>Loop</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="marketplace.html" class="nav-link active">Marketplace</a>
+      <a href="dashboard.html" class="nav-link">Dashboard</a>
     </div>
-  </header>
+    <div class="nav-right" id="navUserSection">
+      <!-- injected by JS -->
+    </div>
+  </nav>
 
-  <!-- ══════════════════════ PAGE HEADER ══════════════════════ -->
+  <!-- Page header -->
   <div class="page-header">
     <div class="page-header-inner">
       <div>
-        <h1 class="page-title">Waste Exchange Marketplace</h1>
-        <p class="page-subtitle">Browse available recyclable materials from generators in your area</p>
+        <h1 class="page-title">Waste Marketplace</h1>
+        <p class="page-sub">Browse available recyclable materials posted by generators</p>
       </div>
-      <div id="createListingActionContainer">
-        <!-- Injected by JS: Post Listing button for Generators OR info badge for Recyclers -->
-      </div>
+      <div id="createListingActionContainer"></div>
     </div>
   </div>
 
-  <!-- ══════════════════════ FILTER BAR ══════════════════════ -->
+  <!-- Filter bar -->
   <div class="filter-bar">
-    <div class="filter-bar-inner">
-      <div class="search-field">
-        <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <div class="filter-inner">
+      <div class="search-wrap">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
           <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
         </svg>
-        <input
-          type="search"
-          id="searchInput"
-          class="search-input"
-          placeholder="Search by title, category, or generator…"
-          oninput="handleSearchFilter()"
-          autocomplete="off"
-        />
+        <input type="search" id="searchInput" class="search-input" placeholder="Search listings…" oninput="handleSearchFilter()" autocomplete="off">
       </div>
-
-      <div class="filter-chips" id="categoryChips">
-        <button class="filter-chip active" onclick="filterByCategory('all', this)">All</button>
-        <button class="filter-chip" onclick="filterByCategory('plastic', this)">🥤 Plastic</button>
-        <button class="filter-chip" onclick="filterByCategory('paper', this)">📦 Cardboard</button>
-        <button class="filter-chip" onclick="filterByCategory('metal', this)">⚙️ Metals</button>
-        <button class="filter-chip" onclick="filterByCategory('glass', this)">🍾 Glass</button>
-        <button class="filter-chip" onclick="filterByCategory('e-waste', this)">💻 E-Waste</button>
-        <button class="filter-chip" onclick="filterByCategory('organic', this)">🍂 Organic</button>
+      <div class="chips" id="categoryChips">
+        <button class="chip active" onclick="filterByCategory('all', this)">All</button>
+        <button class="chip" onclick="filterByCategory('plastic', this)">🥤 Plastic</button>
+        <button class="chip" onclick="filterByCategory('paper', this)">📦 Cardboard</button>
+        <button class="chip" onclick="filterByCategory('metal', this)">⚙️ Metals</button>
+        <button class="chip" onclick="filterByCategory('glass', this)">🍾 Glass</button>
+        <button class="chip" onclick="filterByCategory('e-waste', this)">💻 E-Waste</button>
+        <button class="chip" onclick="filterByCategory('organic', this)">🍂 Organic</button>
       </div>
-
-      <span class="listings-count-badge">
-        <span id="listingsCount">—</span> listings
-      </span>
+      <span class="count-badge" id="listingsCount"></span>
     </div>
   </div>
 
-  <!-- ══════════════════════ LISTINGS GRID ══════════════════════ -->
-  <main class="page-content">
-    <div id="listingsGrid" class="listings-grid">
-      <div class="empty-state" style="grid-column:1/-1">
-        <div class="empty-state-icon">♻️</div>
-        <p class="empty-state-title">Loading materials…</p>
-        <p class="empty-state-sub">Fetching available waste listings</p>
+  <!-- Listings -->
+  <div class="content">
+    <div class="listings-grid" id="listingsGrid">
+      <div class="empty-state">
+        <div class="empty-state-icon">⏳</div>
+        <p class="empty-state-title">Loading listings…</p>
       </div>
     </div>
-  </main>
+  </div>
 
-  <!-- ══════════════════════ FOOTER ══════════════════════ -->
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-inner">
-      <span class="footer-logo">♻ ReLoop</span>
-      <p>A DBMS mini-project · Cloudflare D1 · ACID Transactions · SQL Triggers · SQL Views</p>
+      <span class="footer-logo">Re<span>Loop</span></span>
+      <span class="footer-meta">Cloudflare D1 · ACID Transactions · SQL Triggers · SQL Views</span>
     </div>
   </footer>
 
-  <!-- ══════════════════════ POST LISTING DIALOG ══════════════════════ -->
-  <div class="dialog-overlay" id="listingModal">
-    <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="listingDialogTitle">
-      <div class="dialog-header">
-        <h2 class="dialog-title" id="listingDialogTitle">
-          <span class="dialog-title-icon">📋</span>
-          Post a New Waste Listing
-        </h2>
-        <button class="dialog-close" onclick="closeListingModal()" aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+  <!-- Post Listing Modal -->
+  <div class="modal-overlay" id="listingModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Post a Waste Listing</h2>
+        <button class="modal-close" onclick="closeListingModal()" aria-label="Close">✕</button>
       </div>
-
-      <div class="dialog-body">
-        <p class="dialog-desc">Fill in the details below. Recyclers will see this listing on the marketplace and can submit exchange requests.</p>
-
+      <div class="modal-body">
+        <p class="modal-sub">Recyclers will see this listing and can submit exchange requests.</p>
         <form id="createListingForm" novalidate>
-          <div class="form-field">
-            <label class="form-label" for="listingTitle">Listing Title <span class="required">*</span></label>
-            <input
-              type="text"
-              id="listingTitle"
-              class="form-input"
-              placeholder="e.g. Bundled Cardboard Boxes (Flat Pack)"
-              maxlength="120"
-              required
-            />
-            <span class="form-hint">Be descriptive — include material condition and packaging.</span>
+          <div class="field">
+            <label for="listingTitle">Listing title <span class="req">*</span></label>
+            <input type="text" id="listingTitle" placeholder="e.g. Bundled Cardboard Boxes (Flat Pack)" maxlength="120" required>
+            <div class="hint">Be descriptive — include material condition and approximate quantity.</div>
           </div>
-
-          <div class="form-field">
-            <label class="form-label" for="listingCategorySelect">Material Category <span class="required">*</span></label>
+          <div class="field">
+            <label for="listingCategorySelect">Material category <span class="req">*</span></label>
             <div class="select-wrap">
-              <select id="listingCategorySelect" class="form-input form-select" required>
+              <select id="listingCategorySelect" required>
                 <option value="">— Select a category —</option>
               </select>
-              <svg class="select-arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
             </div>
-            <span class="form-hint">Category determines the CO₂ offset calculation.</span>
           </div>
-
-          <div class="form-field">
-            <label class="form-label" for="listingWeight">Weight (kg) <span class="required">*</span></label>
-            <div class="input-with-icon">
-              <input
-                type="number"
-                id="listingWeight"
-                class="form-input"
-                placeholder="0.00"
-                min="0.1"
-                max="10000"
-                step="0.1"
-                required
-              />
-              <span class="input-suffix">kg</span>
-            </div>
-            <span class="form-hint">Approximate weight of the waste material.</span>
+          <div class="field">
+            <label for="listingWeight">Weight (kg) <span class="req">*</span></label>
+            <input type="number" id="listingWeight" placeholder="0.00" min="0.1" max="99999" step="0.1" required>
           </div>
-
-          <div class="dialog-actions">
-            <button type="button" class="btn btn-outlined" onclick="closeListingModal()">Cancel</button>
-            <button type="submit" class="btn btn-filled-green">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Publish Listing
-            </button>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" onclick="closeListingModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary">Publish Listing</button>
           </div>
         </form>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════ TOAST STACK ══════════════════════ -->
   <div class="toast-stack" id="toastStack"></div>
 
   <script src="js/app.js"></script>

@@ -575,6 +575,69 @@ app.get('/api/dashboard/:userId', async (req, res) => {
   }
 });
 
+// ==============================================================================
+// ADMIN ENDPOINT — POST /api/admin/query
+// ==============================================================================
+
+/**
+ * POST /api/admin/query
+ * Executes a raw SQL statement against the database.
+ * Requires adminKey in the request body for basic auth guard.
+ */
+app.post('/api/admin/query', async (req, res) => {
+  try {
+    const { sql, adminKey } = req.body;
+
+    // ── Auth guard ──────────────────────────────────────────────────────────
+    if (!adminKey || adminKey !== 'reloop_admin_2024') {
+      return res.status(401).json({ success: false, error: 'Unauthorized: invalid admin key.' });
+    }
+
+    if (!sql || typeof sql !== 'string' || !sql.trim()) {
+      return res.status(400).json({ success: false, error: 'No SQL provided.' });
+    }
+
+    // ── Block dangerous operations ──────────────────────────────────────────
+    const upperSql = sql.toUpperCase();
+    const dangerous = [
+      'DROP TABLE',
+      'DELETE FROM USERS',
+      'TRUNCATE'
+    ];
+    for (const op of dangerous) {
+      if (upperSql.includes(op)) {
+        return res.status(403).json({ success: false, error: `Dangerous operation blocked: "${op}" is not permitted via the admin panel.` });
+      }
+    }
+
+    // ── Execute ─────────────────────────────────────────────────────────────
+    const result = await db.query(sql);
+
+    // Normalise: db.query may return an array of rows, or a mssql recordset object
+    let rows = [];
+    if (Array.isArray(result)) {
+      rows = result;
+    } else if (result && result.recordset) {
+      rows = result.recordset;
+    } else if (result && result.rows) {
+      rows = result.rows;
+    }
+
+    const columns = rows.length > 0 ? Object.keys(rows[0]) : [];
+
+    return res.json({
+      success: true,
+      results: rows,
+      columns,
+      rowCount: rows.length
+    });
+
+  } catch (err) {
+    console.error('Admin query error:', err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // Fallback route to index.html for client-side navigation
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

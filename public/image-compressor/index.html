@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Free online image compressor and converter. Compress JPEG, PNG, WebP images up to 90% smaller directly in your browser — no uploads, 100% private." />
+  <meta name="keywords" content="image compressor, image converter, compress image online, webp converter, jpeg compressor, png compressor, batch image compress" />
+  <meta name="robots" content="index, follow" />
+  <title>ImageSqueeze — Free Image Compressor &amp; Converter</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is ImageSqueeze free?","acceptedAnswer":{"@type":"Answer","text":"Yes, 100% free with no limits."}},{"@type":"Question","name":"Do images get uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. All processing happens in your browser. Images never leave your device."}}]}
+  </script>
+
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:#fff;color:#1a1a2e}
+
+    /* Scrollbar */
+    ::-webkit-scrollbar{width:6px;height:6px}
+    ::-webkit-scrollbar-track{background:#f1f5f9}
+    ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+
+    /* Drop zone */
+    #drop-zone{border:2px dashed #93c5fd;transition:border-color .2s,background .2s}
+    #drop-zone:hover,#drop-zone.drag-active{border-color:#2563eb;background:#eff6ff}
+
+    /* Comparator */
+    #comparator-wrap{position:relative;overflow:hidden;cursor:col-resize;user-select:none;touch-action:none}
+    #comparator-wrap img{display:block;width:100%;height:100%;object-fit:contain;position:absolute;top:0;left:0}
+    #img-after{clip-path:inset(0 50% 0 0)}
+    #divider-line{position:absolute;top:0;left:50%;transform:translateX(-50%);width:3px;height:100%;background:#2563eb;pointer-events:none;z-index:10}
+    #divider-handle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #2563eb;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:11;box-shadow:0 2px 12px rgba(37,99,235,.3)}
+    .label-badge{position:absolute;top:12px;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.06em;z-index:12;pointer-events:none}
+    .label-left{left:12px;background:rgba(0,0,0,.5);color:#fff}
+    .label-right{right:12px;background:#2563eb;color:#fff}
+
+    /* FAQ */
+    .faq-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+    .faq-body.open{max-height:500px}
+
+    /* Modal */
+    .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;align-items:center;justify-content:center}
+    .modal-backdrop.active{display:flex}
+
+    /* Ad placeholders (CLS-safe) */
+    .ad-leaderboard{min-height:90px}
+    .ad-rectangle{min-height:250px;min-width:300px}
+    .ad-infeed{min-height:90px}
+
+    /* Queue row hover */
+    .q-row:hover{background:#f8fafc}
+
+    /* Spinner */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .spin{animation:spin .8s linear infinite}
+
+    /* Progress bar */
+    .prog-bar{transition:width .35s ease}
+
+    /* Tab active */
+    .tab-btn.active{background:#2563eb;color:#fff;border-color:#2563eb}
+
+    /* Range slider custom */
+    input[type=range]{accent-color:#2563eb}
+
+    @media(min-width:1280px){#sidebar-ad{position:sticky;top:80px}}
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     TOP AD — Leaderboard (CLS-safe)
+════════════════════════════════════════ -->
+<div class="w-full bg-gray-50 border-b border-gray-100">
+  <div class="max-w-5xl mx-auto px-4 py-2 flex justify-center">
+    <div class="ad-leaderboard w-full max-w-[728px] bg-gray-100 border border-dashed border-gray-300 rounded flex items-center justify-center text-gray-400 text-xs">
+      <!-- <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px" data-ad-client="ca-pub-XXXXXXXX" data-ad-slot="XXXXXXXX"></ins> -->
+      Advertisement · 728×90
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HEADER
+════════════════════════════════════════ -->
+<header class="bg-white border-b border-gray-100 sticky top-0 z-50">
+  <div class="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="#" class="flex items-center gap-2 font-bold text-lg text-gray-900 select-none">
+      <div class="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01"/>
+        </svg>
+      </div>
+      <span>Image<span class="text-blue-600">Squeeze</span></span>
+    </a>
+
+    <!-- Privacy badge -->
+    <div class="flex items-center gap-1.5 text-xs text-green-600 bg-green-50 border border-green-200 px-3 py-1.5 rounded-full">
+      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+      100% Private · No Uploads
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════
+     HERO — Upload Section
+════════════════════════════════════════ -->
+<section class="bg-white py-12 px-4">
+  <div class="max-w-3xl mx-auto text-center">
+    <h1 class="text-4xl md:text-5xl font-black text-gray-900 mb-3 tracking-tight">
+      Compress an Image
+    </h1>
+    <p class="text-gray-500 text-base mb-10">
+      Reduce file size instantly — JPEG, PNG, WebP. Free, fast &amp; 100% in your browser.
+    </p>
+
+    <!-- DROP ZONE -->
+    <div id="drop-zone" class="relative rounded-xl p-12 cursor-pointer mb-4" role="button" tabindex="0" aria-label="Upload images">
+      <input type="file" id="file-input" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+      <div class="flex flex-col items-center gap-4 pointer-events-none">
+        <!-- Upload icon -->
+        <div class="text-blue-500">
+          <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+            <path d="M26 34V14M26 14L18 22M26 14L34 22" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M10 38h32" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p class="text-gray-600 text-base">
+          Drop your images here or <span class="text-blue-600 font-semibold underline cursor-pointer">browse</span>.
+        </p>
+        <button id="select-btn"
+          class="mt-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg text-sm transition shadow-sm pointer-events-auto"
+          onclick="document.getElementById('file-input').click()">
+          Select Image
+        </button>
+      </div>
+    </div>
+
+    <!-- Supported formats -->
+    <p class="text-xs text-gray-400">Supports JPEG, PNG, WebP, GIF, BMP, AVIF · Multiple files OK</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     TOOL AREA (hidden until upload)
+════════════════════════════════════════ -->
+<section id="tool-area" class="hidden bg-gray-50 border-t border-gray-100 py-8 px-4">
+  <div class="max-w-5xl mx-auto flex gap-6">
+
+    <!-- Main column -->
+    <div class="flex-1 min-w-0 space-y-5">
+
+      <!-- ── CONTROLS ── -->
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+          <!-- Quality -->
+          <div class="space-y-2">
+            <div class="flex justify-between">
+              <label class="text-sm font-semibold text-gray-700">Quality</label>
+              <span id="quality-value" class="text-blue-600 font-bold text-sm">80%</span>
+            </div>
+            <input type="range" id="quality-slider" min="1" max="100" value="80" class="w-full h-2 rounded-lg cursor-pointer" />
+            <p class="text-xs text-gray-400">1 = smallest · 100 = best</p>
+          </div>
+
+          <!-- Format -->
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700">Output Format</label>
+            <select id="format-select" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="image/webp">WebP (Recommended)</option>
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/png">PNG (Lossless)</option>
+            </select>
+            <p class="text-xs text-gray-400">WebP = best size/quality</p>
+          </div>
+
+          <!-- Target KB -->
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700">Target Size (KB)</label>
+            <div class="flex gap-2">
+              <input type="number" id="target-kb" placeholder="e.g. 100"
+                class="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+              <button id="apply-target-btn"
+                class="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold px-3 rounded-lg transition">Apply</button>
+            </div>
+            <p class="text-xs text-gray-400">Auto binary-search</p>
+          </div>
+
+          <!-- Actions -->
+          <div class="space-y-2">
+            <label class="block text-sm font-semibold text-gray-700">Actions</label>
+            <div class="flex gap-2">
+              <button id="compress-all-btn"
+                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs px-3 py-2 rounded-lg transition">
+                ⚡ Compress All
+              </button>
+              <button id="clear-all-btn"
+                class="bg-gray-100 hover:bg-gray-200 text-gray-600 font-semibold text-xs px-3 py-2 rounded-lg transition">
+                Clear
+              </button>
+            </div>
+            <button id="download-zip-btn"
+              class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold text-xs py-2 rounded-lg transition flex items-center justify-center gap-1.5 opacity-40 cursor-not-allowed"
+              disabled>
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+              Download All (.ZIP)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BEFORE / AFTER COMPARATOR ── -->
+      <div id="comparator-section" class="hidden bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+          <h2 class="text-sm font-bold text-gray-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7"/></svg>
+            Before / After Preview
+            <span class="text-gray-400 font-normal text-xs ml-1">← drag handle →</span>
+          </h2>
+          <!-- Stats -->
+          <div class="flex items-center gap-3 text-xs">
+            <span class="text-gray-500">Original: <strong id="stat-original" class="text-gray-800">—</strong></span>
+            <span class="text-gray-300">|</span>
+            <span class="text-gray-500">Compressed: <strong id="stat-compressed" class="text-blue-600">—</strong></span>
+            <span class="text-gray-300">|</span>
+            <span class="text-gray-500">Saved: <strong id="stat-saved" class="text-green-600">—</strong></span>
+          </div>
+        </div>
+
+        <!-- Image comparator -->
+        <div id="comparator-wrap" style="height:380px;background:#f8fafc;">
+          <img id="img-before" src="" alt="Original" draggable="false" />
+          <img id="img-after" src="" alt="Compressed" draggable="false" />
+          <div id="divider-line">
+            <div id="divider-handle">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M6 3L3 9l3 6M12 3l3 6-3 6" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </div>
+          <div class="label-badge label-left">ORIGINAL</div>
+          <div class="label-badge label-right">COMPRESSED</div>
+        </div>
+
+        <!-- Download row -->
+        <div class="px-5 py-3 border-t border-gray-100 flex items-center gap-3 flex-wrap">
+          <button id="download-single-btn"
+            class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm px-4 py-2 rounded-lg transition">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+            Download Compressed Image
+          </button>
+          <span id="comparator-filename" class="text-gray-400 text-xs truncate"></span>
+        </div>
+      </div>
+
+      <!-- ── BATCH QUEUE ── -->
+      <div id="queue-section" class="hidden bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+          <h2 class="text-sm font-bold text-gray-800 flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+            Batch Queue
+          </h2>
+          <span id="queue-count" class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">0 images</span>
+        </div>
+
+        <!-- Table header -->
+        <div class="grid grid-cols-12 gap-2 px-5 py-2 bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wide">
+          <div class="col-span-1">Thumb</div>
+          <div class="col-span-4">Filename</div>
+          <div class="col-span-2 text-center">Original</div>
+          <div class="col-span-2 text-center">Output</div>
+          <div class="col-span-2 text-center">Saved</div>
+          <div class="col-span-1 text-center">DL</div>
+        </div>
+
+        <!-- Rows -->
+        <div id="queue-list" class="max-h-72 overflow-y-auto divide-y divide-gray-50"></div>
+
+        <!-- Summary bar -->
+        <div class="px-5 py-3 border-t border-gray-100 bg-gray-50">
+          <div class="flex flex-wrap items-center gap-4 text-xs text-gray-500 mb-2">
+            <span>Total original: <strong id="total-original" class="text-gray-800">—</strong></span>
+            <span>Total output: <strong id="total-compressed" class="text-blue-600">—</strong></span>
+            <span>Total saved: <strong id="total-saved" class="text-green-600">—</strong></span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-1.5">
+            <div id="global-progress" class="prog-bar bg-blue-500 h-1.5 rounded-full" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main col -->
+
+    <!-- Sidebar Ad -->
+    <aside id="sidebar-ad" class="hidden xl:block w-[300px] flex-shrink-0 space-y-4">
+      <div class="ad-rectangle bg-gray-50 border border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-xs text-center p-3">
+        Advertisement<br/>300×250
+      </div>
+      <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2">
+        <h3 class="text-xs font-bold text-blue-700">💡 Pro Tips</h3>
+        <ul class="space-y-1.5 text-xs text-gray-600">
+          <li>▸ <strong>WebP</strong> is 30% smaller than JPEG</li>
+          <li>▸ Quality <strong>75–85%</strong> is the sweet spot</li>
+          <li>▸ Use <strong>Target KB</strong> for strict limits</li>
+          <li>▸ PNG only for transparent images</li>
+        </ul>
+      </div>
+    </aside>
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     IN-FEED AD
+════════════════════════════════════════ -->
+<div class="max-w-5xl mx-auto px-4 py-4">
+  <div class="ad-infeed bg-gray-50 border border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-xs">
+    Advertisement · In-Feed
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SEO CONTENT
+════════════════════════════════════════ -->
+<main id="guide" class="max-w-5xl mx-auto px-4 py-10 space-y-14">
+
+  <!-- How it works -->
+  <section>
+    <h2 class="text-2xl font-black text-gray-900 mb-6 text-center">How ImageSqueeze Works</h2>
+    <div class="grid md:grid-cols-3 gap-5">
+      <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm text-center hover:border-blue-200 transition">
+        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg mx-auto mb-3">1</div>
+        <h3 class="font-bold text-gray-900 mb-2">Upload Your Images</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Drop one or many images onto the upload zone. JPEG, PNG, WebP, GIF and more are all supported.</p>
+      </div>
+      <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm text-center hover:border-blue-200 transition">
+        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg mx-auto mb-3">2</div>
+        <h3 class="font-bold text-gray-900 mb-2">Adjust &amp; Compress</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Set quality, choose format, or enter a target file size in KB. Our binary-search algorithm finds the optimal setting automatically.</p>
+      </div>
+      <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm text-center hover:border-blue-200 transition">
+        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg mx-auto mb-3">3</div>
+        <h3 class="font-bold text-gray-900 mb-2">Download Instantly</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">Download single files or grab everything in one ZIP archive. No email. No waiting. Instant results.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Lossy vs Lossless -->
+  <section>
+    <h2 class="text-2xl font-black text-gray-900 mb-6">Lossy vs. Lossless Compression</h2>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div class="bg-orange-50 border border-orange-100 rounded-xl p-6">
+        <h3 class="text-orange-600 font-bold text-lg mb-3">⚡ Lossy (JPEG, WebP)</h3>
+        <p class="text-gray-600 text-sm leading-relaxed mb-4">Permanently removes data the eye won't notice. Achieves 60–90% reduction. Best for photos, social content, and blog images.</p>
+        <ul class="space-y-1.5 text-sm text-gray-600">
+          <li>✓ Huge file size savings</li>
+          <li>✓ Still visually excellent at quality 80+</li>
+          <li>✗ Slight quality reduction vs original</li>
+        </ul>
+      </div>
+      <div class="bg-green-50 border border-green-100 rounded-xl p-6">
+        <h3 class="text-green-600 font-bold text-lg mb-3">🔒 Lossless (PNG)</h3>
+        <p class="text-gray-600 text-sm leading-relaxed mb-4">Preserves every pixel perfectly. Smaller savings (10–30%). Best for logos, UI screenshots, and transparent images.</p>
+        <ul class="space-y-1.5 text-sm text-gray-600">
+          <li>✓ Zero quality degradation</li>
+          <li>✓ Perfect for text &amp; sharp edges</li>
+          <li>✗ Larger files than lossy for photos</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Privacy -->
+  <section class="bg-blue-50 border border-blue-100 rounded-2xl p-8">
+    <div class="flex gap-5 items-start flex-col md:flex-row">
+      <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+        <svg class="w-7 h-7 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-xl font-black text-gray-900 mb-2">Your Privacy Is 100% Guaranteed</h2>
+        <p class="text-gray-600 text-sm leading-relaxed mb-4">Unlike other tools that upload your images to remote servers, ImageSqueeze processes everything locally inside your own browser using the <strong>HTML5 Canvas API</strong>. Your images never leave your device — not even for a millisecond.</p>
+        <div class="grid sm:grid-cols-2 gap-3 text-sm">
+          <div class="flex gap-2"><span class="text-green-600 font-bold">✓</span><span class="text-gray-600">All processing via <strong>canvas.toBlob()</strong> — fully local</span></div>
+          <div class="flex gap-2"><span class="text-green-600 font-bold">✓</span><span class="text-gray-600">Works offline after first page load</span></div>
+          <div class="flex gap-2"><span class="text-green-600 font-bold">✓</span><span class="text-gray-600">No server, no cloud, no logs</span></div>
+          <div class="flex gap-2"><span class="text-green-600 font-bold">✓</span><span class="text-gray-600">Safe for private &amp; medical images</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why compress -->
+  <section>
+    <h2 class="text-2xl font-black text-gray-900 mb-4">Why Image Compression Matters</h2>
+    <div class="prose prose-gray max-w-none text-sm text-gray-600 leading-relaxed space-y-3">
+      <p>Images account for over <strong class="text-gray-800">50% of the average webpage's total bytes</strong>. Unoptimized images are the #1 cause of slow page loads, high bounce rates, and poor Core Web Vitals — which directly affect your Google rankings.</p>
+      <p>Google's Lighthouse specifically flags uncompressed images as a critical issue. Properly optimized images improve your <strong class="text-gray-800">Largest Contentful Paint (LCP)</strong> score — one of Google's top ranking signals.</p>
+      <p>A 5 MB hero image can add 5–8 seconds of load time on mobile. Compressed to 300 KB it loads in under a second. Research shows a <strong class="text-gray-800">1-second delay reduces conversions by 7%</strong>. Smaller images also lower CDN bandwidth costs and improve experience for users on slower connections worldwide.</p>
+    </div>
+  </section>
+
+  <!-- WebP -->
+  <section>
+    <h2 class="text-2xl font-black text-gray-900 mb-4">What Is WebP and Should You Use It?</h2>
+    <p class="text-gray-600 text-sm leading-relaxed">WebP is a modern format by Google that supports both lossy and lossless compression, transparency, and animation — beating JPEG by <strong class="text-gray-800">25–35%</strong> and PNG by <strong class="text-gray-800">26%</strong> at equivalent quality. As of 2024, WebP is supported by 96%+ of all browsers including Chrome, Firefox, Safari 14+, and Edge. For most web images, WebP at quality 75–85 is the clear best choice.</p>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq">
+    <h2 class="text-2xl font-black text-gray-900 mb-2">Frequently Asked Questions</h2>
+    <p class="text-gray-500 text-sm mb-6">Everything you need to know about image compression.</p>
+    <div id="faq-list" class="space-y-2 max-w-3xl"></div>
+  </section>
+
+</main>
+
+<!-- ═══════════════════════════════════════
+     FOOTER
+════════════════════════════════════════ -->
+<footer class="bg-gray-50 border-t border-gray-100 mt-12">
+  <div class="max-w-5xl mx-auto px-4 py-10">
+    <div class="grid md:grid-cols-4 gap-8 mb-8">
+      <div>
+        <div class="flex items-center gap-2 font-bold text-gray-900 mb-2">
+          <div class="w-6 h-6 bg-blue-600 rounded-md flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01"/></svg>
+          </div>
+          ImageSqueeze
+        </div>
+        <p class="text-gray-400 text-xs leading-relaxed">Free, private image compression. No sign-up. No uploads.</p>
+      </div>
+      <div>
+        <h4 class="text-gray-700 font-semibold text-sm mb-3">Tools</h4>
+        <ul class="space-y-2 text-xs text-gray-400">
+          <li><a href="#" class="hover:text-blue-600 transition">Image Compressor</a></li>
+          <li><a href="#" class="hover:text-blue-600 transition">WebP Converter</a></li>
+          <li><a href="#" class="hover:text-blue-600 transition">Batch Processor</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-gray-700 font-semibold text-sm mb-3">Learn</h4>
+        <ul class="space-y-2 text-xs text-gray-400">
+          <li><a href="#guide" class="hover:text-blue-600 transition">How It Works</a></li>
+          <li><a href="#faq" class="hover:text-blue-600 transition">FAQ</a></li>
+          <li><a href="#guide" class="hover:text-blue-600 transition">WebP Guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-gray-700 font-semibold text-sm mb-3">Legal</h4>
+        <ul class="space-y-2 text-xs text-gray-400">
+          <li><button onclick="openModal('privacy-modal')" class="hover:text-blue-600 transition">Privacy Policy</button></li>
+          <li><button onclick="openModal('tos-modal')" class="hover:text-blue-600 transition">Terms of Service</button></li>
+          <li><button onclick="openModal('about-modal')" class="hover:text-blue-600 transition">About Us</button></li>
+          <li><button onclick="openModal('contact-modal')" class="hover:text-blue-600 transition">Contact</button></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 pt-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-400">
+      <p>© 2024 ImageSqueeze. All image processing is performed locally in your browser.</p>
+      <div class="flex items-center gap-3">
+        <button onclick="openModal('privacy-modal')" class="hover:text-blue-600 transition">Privacy</button>
+        <span>·</span>
+        <button onclick="openModal('tos-modal')" class="hover:text-blue-600 transition">Terms</button>
+        <span>·</span>
+        <button onclick="openModal('contact-modal')" class="hover:text-blue-600 transition">Contact</button>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     MODALS
+════════════════════════════════════════ -->
+<!-- Privacy -->
+<div id="privacy-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col shadow-2xl">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100">
+      <h2 class="font-bold text-gray-900">Privacy Policy</h2>
+      <button onclick="closeModal('privacy-modal')" class="text-gray-400 hover:text-gray-700 p-1">✕</button>
+    </div>
+    <div class="overflow-y-auto p-5 space-y-4 text-gray-600 text-sm leading-relaxed">
+      <p class="text-gray-400 text-xs">Last updated: January 1, 2024</p>
+      <h3 class="text-gray-900 font-semibold">1. Image Processing — 100% Local</h3>
+      <p>ImageSqueeze processes all images entirely within your web browser. Your images are <strong>never uploaded to any server</strong>. All compression and conversion operations use the HTML5 Canvas API, FileReader API, and Blob API — all operating exclusively in your browser's sandbox.</p>
+      <h3 class="text-gray-900 font-semibold">2. Cookies &amp; Advertising</h3>
+      <p>We display ads via Google AdSense. Google uses cookies to serve ads based on prior visits. You can opt out at <a href="https://www.google.com/settings/ads" class="text-blue-600 hover:underline" target="_blank">Google Ads Settings</a>. We also use cookies to remember your quality/format preferences locally.</p>
+      <h3 class="text-gray-900 font-semibold">3. Analytics</h3>
+      <p>We may use anonymized analytics to understand aggregate usage. No personally identifiable information or image data is ever collected.</p>
+      <h3 class="text-gray-900 font-semibold">4. Children's Privacy</h3>
+      <p>Our service is not directed to children under 13. We do not knowingly collect information from children.</p>
+      <h3 class="text-gray-900 font-semibold">5. Contact</h3>
+      <p>Questions? Email privacy@imagesqueeze.app</p>
+    </div>
+  </div>
+</div>
+
+<!-- Terms -->
+<div id="tos-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col shadow-2xl">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100">
+      <h2 class="font-bold text-gray-900">Terms of Service</h2>
+      <button onclick="closeModal('tos-modal')" class="text-gray-400 hover:text-gray-700 p-1">✕</button>
+    </div>
+    <div class="overflow-y-auto p-5 space-y-4 text-gray-600 text-sm leading-relaxed">
+      <p class="text-gray-400 text-xs">Last updated: January 1, 2024</p>
+      <h3 class="text-gray-900 font-semibold">1. Acceptance</h3>
+      <p>By using ImageSqueeze, you agree to these Terms. If you disagree, please don't use the service.</p>
+      <h3 class="text-gray-900 font-semibold">2. Service</h3>
+      <p>ImageSqueeze provides free browser-based image compression. All processing is local. The service is provided "as is" without warranty.</p>
+      <h3 class="text-gray-900 font-semibold">3. Acceptable Use</h3>
+      <p>Use ImageSqueeze only for lawful purposes. You are responsible for ensuring you have rights to process any images you use with the tool.</p>
+      <h3 class="text-gray-900 font-semibold">4. Limitation of Liability</h3>
+      <p>To the maximum extent permitted by law, ImageSqueeze shall not be liable for indirect, incidental, or consequential damages from your use of the service.</p>
+    </div>
+  </div>
+</div>
+
+<!-- About -->
+<div id="about-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[85vh] flex flex-col shadow-2xl">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100">
+      <h2 class="font-bold text-gray-900">About ImageSqueeze</h2>
+      <button onclick="closeModal('about-modal')" class="text-gray-400 hover:text-gray-700 p-1">✕</button>
+    </div>
+    <div class="overflow-y-auto p-5 space-y-4 text-gray-600 text-sm leading-relaxed">
+      <div class="bg-blue-50 border border-blue-100 rounded-lg p-4">
+        <p class="text-blue-700 font-medium">Our mission: make professional-grade image optimization accessible to everyone — without compromising privacy.</p>
+      </div>
+      <p>ImageSqueeze was built by developers frustrated with tools that upload your images to remote servers, impose file size limits, or require account signups just to compress a photo.</p>
+      <p>We built ImageSqueeze as 100% client-side — every line of compression code runs inside your browser. Your images stay on your device, the service works offline, and there are no artificial limits.</p>
+      <h3 class="text-gray-900 font-semibold">The Tech Stack</h3>
+      <p>Built with Semantic HTML5, Tailwind CSS, and vanilla JavaScript ES6+. Uses <code class="bg-gray-100 px-1 rounded">HTMLCanvasElement.toBlob()</code> for compression, <code class="bg-gray-100 px-1 rounded">FileReader</code> for file ingestion, and JSZip for batch ZIP generation.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Contact -->
+<div id="contact-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+  <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[85vh] flex flex-col shadow-2xl">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100">
+      <h2 class="font-bold text-gray-900">Contact Us</h2>
+      <button onclick="closeModal('contact-modal')" class="text-gray-400 hover:text-gray-700 p-1">✕</button>
+    </div>
+    <div class="overflow-y-auto p-5 space-y-4">
+      <p class="text-gray-500 text-sm">Have feedback, a feature request, or found a bug?</p>
+      <form onsubmit="handleContactSubmit(event)" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+          <input type="text" required placeholder="Your name" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" required placeholder="your@email.com" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+          <textarea required rows="4" placeholder="Describe your issue or suggestion..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 resize-none"></textarea>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl transition text-sm">Send Message</button>
+        <p id="contact-success" class="hidden text-green-600 text-sm text-center font-medium">✓ Thanks! We'll get back to you soon.</p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden canvas -->
+<canvas id="processing-canvas" class="hidden"></canvas>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── State ──────────────────────────────────────────────────────
+const state = { queue: [], activeId: null, isDragging: false, dividerPos: 50 };
+let idCounter = 0;
+const genId = () => ++idCounter;
+
+// ── DOM ────────────────────────────────────────────────────────
+const dropZone          = document.getElementById('drop-zone');
+const fileInput         = document.getElementById('file-input');
+const qualitySlider     = document.getElementById('quality-slider');
+const qualityValue      = document.getElementById('quality-value');
+const formatSelect      = document.getElementById('format-select');
+const targetKbInput     = document.getElementById('target-kb');
+const applyTargetBtn    = document.getElementById('apply-target-btn');
+const compressAllBtn    = document.getElementById('compress-all-btn');
+const clearAllBtn       = document.getElementById('clear-all-btn');
+const downloadZipBtn    = document.getElementById('download-zip-btn');
+const toolArea          = document.getElementById('tool-area');
+const comparatorSection = document.getElementById('comparator-section');
+const queueSection      = document.getElementById('queue-section');
+const comparatorWrap    = document.getElementById('comparator-wrap');
+const imgBefore         = document.getElementById('img-before');
+const imgAfter          = document.getElementById('img-after');
+const downloadSingleBtn = document.getElementById('download-single-btn');
+const comparatorFilename= document.getElementById('comparator-filename');
+const statOriginal      = document.getElementById('stat-original');
+const statCompressed    = document.getElementById('stat-compressed');
+const statSaved         = document.getElementById('stat-saved');
+const queueList         = document.getElementById('queue-list');
+const queueCount        = document.getElementById('queue-count');
+const totalOriginalEl   = document.getElementById('total-original');
+const totalCompressedEl = document.getElementById('total-compressed');
+const totalSavedEl      = document.getElementById('total-saved');
+const globalProgress    = document.getElementById('global-progress');
+const processingCanvas  = document.getElementById('processing-canvas');
+
+// ── Utils ──────────────────────────────────────────────────────
+function formatBytes(b) {
+  if (b === 0) return '0 B';
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+  return (b / 1048576).toFixed(2) + ' MB';
+}
+function formatExt(mime) {
+  return { 'image/webp':'webp','image/jpeg':'jpg','image/png':'png' }[mime] || 'jpg';
+}
+function loadImage(src) {
+  return new Promise((res, rej) => { const i = new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=src; });
+}
+function fileToDataURL(file) {
+  return new Promise((res, rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(file); });
+}
+function canvasToBlob(canvas, mime, quality) {
+  return new Promise(res => canvas.toBlob(b => res(b), mime, quality / 100));
+}
+
+// ── Core Compression ───────────────────────────────────────────
+async function compressImage(file, quality, mime) {
+  const dataURL = await fileToDataURL(file);
+  const img = await loadImage(dataURL);
+  processingCanvas.width  = img.naturalWidth;
+  processingCanvas.height = img.naturalHeight;
+  processingCanvas.getContext('2d').drawImage(img, 0, 0);
+  const q = mime === 'image/png' ? 100 : quality;
+  return canvasToBlob(processingCanvas, mime, q);
+}
+
+async function compressToTargetKB(file, targetKb, mime) {
+  const targetBytes = targetKb * 1024;
+  let lo = 1, hi = 100, best = null, bestQ = 80;
+  for (let i = 0; i < 12; i++) {
+    const mid = Math.round((lo + hi) / 2);
+    const blob = await compressImage(file, mid, mime);
+    if (blob.size <= targetBytes) { lo = mid + 1; best = blob; bestQ = mid; }
+    else { hi = mid - 1; }
+    if (lo > hi) break;
+  }
+  if (!best) best = await compressImage(file, 1, mime);
+  qualitySlider.value = bestQ;
+  qualityValue.textContent = bestQ + '%';
+  return best;
+}
+
+// ── Queue ──────────────────────────────────────────────────────
+function addFilesToQueue(files) {
+  const imgs = Array.from(files).filter(f => f.type.startsWith('image/'));
+  if (!imgs.length) return;
+  imgs.forEach(file => {
+    state.queue.push({ id: genId(), file, originalSize: file.size, compressedBlob: null, compressedSize: null, compressedURL: null, originalURL: null, status: 'pending' });
+  });
+  toolArea.classList.remove('hidden');
+  queueSection.classList.remove('hidden');
+  renderQueue();
+  compressAll();
+}
+
+function renderQueue() {
+  queueCount.textContent = `${state.queue.length} image${state.queue.length !== 1 ? 's' : ''}`;
+  queueList.innerHTML = '';
+  state.queue.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'q-row grid grid-cols-12 gap-2 px-5 py-3 items-center';
+
+    // Thumb
+    const tc = document.createElement('div'); tc.className = 'col-span-1';
+    if (item.originalURL) {
+      const th = document.createElement('img');
+      th.src = item.originalURL; th.className = 'w-9 h-9 object-cover rounded-lg cursor-pointer hover:ring-2 hover:ring-blue-400 transition'; th.title = 'Preview';
+      th.addEventListener('click', () => setActivePreview(item.id));
+      tc.appendChild(th);
+    } else { tc.innerHTML = '<div class="w-9 h-9 rounded-lg bg-gray-100 animate-pulse"></div>'; }
+
+    // Name
+    const nc = document.createElement('div'); nc.className = 'col-span-4 text-xs text-gray-700 truncate'; nc.title = item.file.name; nc.textContent = item.file.name;
+
+    // Original
+    const oc = document.createElement('div'); oc.className = 'col-span-2 text-center text-xs text-gray-500'; oc.textContent = formatBytes(item.originalSize);
+
+    // Compressed
+    const cc = document.createElement('div'); cc.className = 'col-span-2 text-center text-xs font-semibold';
+    if (item.status === 'processing') cc.innerHTML = '<div class="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full spin mx-auto"></div>';
+    else if (item.status === 'done') { cc.textContent = formatBytes(item.compressedSize); cc.classList.add('text-blue-600'); }
+    else if (item.status === 'error') { cc.textContent = 'Error'; cc.classList.add('text-red-500'); }
+    else { cc.textContent = '—'; cc.classList.add('text-gray-300'); }
+
+    // Saved
+    const sc = document.createElement('div'); sc.className = 'col-span-2 text-center text-xs font-bold';
+    if (item.status === 'done') {
+      const pct = Math.round((1 - item.compressedSize / item.originalSize) * 100);
+      sc.textContent = pct > 0 ? `−${pct}%` : `+${Math.abs(pct)}%`;
+      sc.classList.add(pct > 0 ? 'text-green-600' : 'text-orange-500');
+    } else { sc.textContent = '—'; sc.classList.add('text-gray-300'); }
+
+    // DL
+    const dc = document.createElement('div'); dc.className = 'col-span-1 flex justify-center';
+    if (item.status === 'done' && item.compressedBlob) {
+      const btn = document.createElement('button');
+      btn.className = 'text-blue-500 hover:text-blue-700 transition p-1'; btn.title = 'Download';
+      btn.innerHTML = '<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>';
+      btn.addEventListener('click', () => downloadItem(item));
+      dc.appendChild(btn);
+    } else { dc.innerHTML = '<span class="text-gray-200 text-xs">—</span>'; }
+
+    row.append(tc, nc, oc, cc, sc, dc);
+    queueList.appendChild(row);
+  });
+  updateQueueStats();
+  updateZipBtn();
+}
+
+function updateQueueStats() {
+  const done = state.queue.filter(i => i.status === 'done');
+  if (!done.length) { totalOriginalEl.textContent = '—'; totalCompressedEl.textContent = '—'; totalSavedEl.textContent = '—'; globalProgress.style.width = '0%'; return; }
+  const tOrig = done.reduce((s, i) => s + i.originalSize, 0);
+  const tComp = done.reduce((s, i) => s + (i.compressedSize || 0), 0);
+  const pct = Math.round((1 - tComp / tOrig) * 100);
+  totalOriginalEl.textContent = formatBytes(tOrig);
+  totalCompressedEl.textContent = formatBytes(tComp);
+  totalSavedEl.textContent = `${pct > 0 ? '-' : '+'}${Math.abs(pct)}% (${formatBytes(Math.abs(tOrig - tComp))})`;
+  globalProgress.style.width = Math.round((done.length / state.queue.length) * 100) + '%';
+}
+
+function updateZipBtn() {
+  const has = state.queue.some(i => i.status === 'done');
+  downloadZipBtn.disabled = !has;
+  downloadZipBtn.classList.toggle('opacity-40', !has);
+  downloadZipBtn.classList.toggle('cursor-not-allowed', !has);
+}
+
+// ── Compress ───────────────────────────────────────────────────
+async function compressAll() {
+  const mime = formatSelect.value, quality = parseInt(qualitySlider.value);
+  for (const item of state.queue) {
+    if (item.status === 'done' || item.status === 'processing') continue;
+    await processItem(item, quality, mime);
+  }
+}
+
+async function processItem(item, quality, mime) {
+  item.status = 'processing';
+  if (!item.originalURL) item.originalURL = await fileToDataURL(item.file);
+  renderQueue();
+  try {
+    const blob = await compressImage(item.file, quality, mime);
+    item.compressedBlob = blob; item.compressedURL = URL.createObjectURL(blob);
+    item.compressedSize = blob.size; item.status = 'done';
+    if (state.queue.filter(i => i.status === 'done').length === 1) setActivePreview(item.id);
+  } catch(e) { item.status = 'error'; console.error(e); }
+  renderQueue();
+}
+
+async function setActivePreview(id) {
+  const item = state.queue.find(i => i.id === id);
+  if (!item || item.status !== 'done') return;
+  state.activeId = id;
+  if (!item.originalURL) item.originalURL = await fileToDataURL(item.file);
+  comparatorSection.classList.remove('hidden');
+  imgBefore.src = item.originalURL;
+  imgAfter.src  = item.compressedURL;
+  statOriginal.textContent   = formatBytes(item.originalSize);
+  statCompressed.textContent = formatBytes(item.compressedSize);
+  const s = Math.round((1 - item.compressedSize / item.originalSize) * 100);
+  statSaved.textContent = s > 0 ? `−${s}%` : `+${Math.abs(s)}%`;
+  comparatorFilename.textContent = item.file.name;
+  setDivider(50);
+  // Smooth scroll to comparator
+  comparatorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Comparator Drag ────────────────────────────────────────────
+function setDivider(pct) {
+  const c = Math.min(Math.max(pct, 0), 100);
+  state.dividerPos = c;
+  imgAfter.style.clipPath = `inset(0 ${100 - c}% 0 0)`;
+  document.getElementById('divider-line').style.left = c + '%';
+}
+function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
+comparatorWrap.addEventListener('mousedown', e => { e.preventDefault(); state.isDragging = true; moveDrag(e); });
+comparatorWrap.addEventListener('touchstart', e => { e.preventDefault(); state.isDragging = true; moveDrag(e); }, { passive: false });
+function moveDrag(e) {
+  if (!state.isDragging) return;
+  const r = comparatorWrap.getBoundingClientRect();
+  setDivider(((getX(e) - r.left) / r.width) * 100);
+}
+function stopDrag() { state.isDragging = false; }
+document.addEventListener('mousemove', moveDrag);
+document.addEventListener('touchmove', moveDrag, { passive: false });
+document.addEventListener('mouseup', stopDrag);
+document.addEventListener('touchend', stopDrag);
+
+// ── Quality Slider Live ────────────────────────────────────────
+qualitySlider.addEventListener('input', () => {
+  qualityValue.textContent = qualitySlider.value + '%';
+  clearTimeout(state._liveTimer);
+  state._liveTimer = setTimeout(liveRecompress, 300);
+});
+async function liveRecompress() {
+  if (state.activeId === null) return;
+  const item = state.queue.find(i => i.id === state.activeId); if (!item) return;
+  const blob = await compressImage(item.file, parseInt(qualitySlider.value), formatSelect.value);
+  imgAfter.src = URL.createObjectURL(blob);
+  statCompressed.textContent = formatBytes(blob.size);
+  const s = Math.round((1 - blob.size / item.originalSize) * 100);
+  statSaved.textContent = s > 0 ? `−${s}%` : `+${Math.abs(s)}%`;
+}
+formatSelect.addEventListener('change', () => { if (state.activeId !== null) liveRecompress(); });
+
+// ── Target KB ──────────────────────────────────────────────────
+applyTargetBtn.addEventListener('click', async () => {
+  const kb = parseFloat(targetKbInput.value);
+  if (!kb || kb <= 0) { alert('Enter a valid KB target.'); return; }
+  if (!state.queue.length) { alert('Upload an image first.'); return; }
+  applyTargetBtn.textContent = '…'; applyTargetBtn.disabled = true;
+  state.queue.forEach(i => i.status = 'pending'); renderQueue();
+  const mime = formatSelect.value;
+  for (const item of state.queue) {
+    item.status = 'processing'; renderQueue();
+    try {
+      const blob = await compressToTargetKB(item.file, kb, mime);
+      if (!item.originalURL) item.originalURL = await fileToDataURL(item.file);
+      item.compressedBlob = blob; item.compressedURL = URL.createObjectURL(blob);
+      item.compressedSize = blob.size; item.status = 'done';
+    } catch(e) { item.status = 'error'; }
+    renderQueue();
+  }
+  applyTargetBtn.textContent = 'Apply'; applyTargetBtn.disabled = false;
+  const active = state.queue.find(i => i.id === state.activeId) || state.queue[0];
+  if (active && active.status === 'done') setActivePreview(active.id);
+});
+
+// ── Buttons ────────────────────────────────────────────────────
+compressAllBtn.addEventListener('click', async () => {
+  const mime = formatSelect.value, quality = parseInt(qualitySlider.value);
+  state.queue.forEach(i => i.status = 'pending'); renderQueue();
+  for (const item of state.queue) await processItem(item, quality, mime);
+});
+
+clearAllBtn.addEventListener('click', () => {
+  state.queue.forEach(i => { if (i.compressedURL) URL.revokeObjectURL(i.compressedURL); });
+  state.queue.length = 0; state.activeId = null;
+  comparatorSection.classList.add('hidden');
+  queueSection.classList.add('hidden');
+  toolArea.classList.add('hidden');
+  renderQueue();
+});
+
+downloadSingleBtn.addEventListener('click', () => {
+  const item = state.queue.find(i => i.id === state.activeId);
+  if (item?.compressedBlob) downloadBlob(item.compressedBlob, outName(item.file.name));
+});
+
+downloadZipBtn.addEventListener('click', async () => {
+  const done = state.queue.filter(i => i.status === 'done' && i.compressedBlob);
+  if (!done.length) return;
+  downloadZipBtn.innerHTML = '<svg class="w-4 h-4 spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" opacity=".75"/></svg> Creating ZIP…';
+  downloadZipBtn.disabled = true;
+  const zip = new JSZip().folder('compressed');
+  for (const item of done) zip.file(outName(item.file.name), await item.compressedBlob.arrayBuffer());
+  const content = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{ level:1 } });
+  downloadBlob(content, 'compressed-images.zip');
+  downloadZipBtn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg> Download All (.ZIP)';
+  downloadZipBtn.disabled = false; updateZipBtn();
+});
+
+function downloadBlob(blob, filename) {
+  const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: filename });
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 3000);
+}
+function downloadItem(item) { if (item.compressedBlob) downloadBlob(item.compressedBlob, outName(item.file.name)); }
+function outName(name) { return name.replace(/\.[^/.]+$/, '') + '.' + formatExt(formatSelect.value); }
+
+// ── Drop Zone Events ───────────────────────────────────────────
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-active'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-active'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-active'); addFilesToQueue(e.dataTransfer.files); });
+fileInput.addEventListener('change', () => { if (fileInput.files.length) addFilesToQueue(fileInput.files); fileInput.value = ''; });
+dropZone.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') fileInput.click(); });
+
+// ── Modals ─────────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow = ''; }
+document.querySelectorAll('.modal-backdrop').forEach(m => m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop.active').forEach(m => closeModal(m.id)); });
+function handleContactSubmit(e) {
+  e.preventDefault();
+  document.getElementById('contact-success').classList.remove('hidden');
+  e.target.reset();
+  setTimeout(() => document.getElementById('contact-success').classList.add('hidden'), 4000);
+}
+
+// ── FAQ ────────────────────────────────────────────────────────
+const faqs = [
+  { q:'Is ImageSqueeze completely free?', a:'Yes — 100% free, no account required, no file limits. We sustain the service through non-intrusive ads.' },
+  { q:'Do my images get uploaded to a server?', a:"No. Every operation runs inside your browser using the HTML5 Canvas API. Your images never touch our servers — or anyone else's. You can disconnect from the internet after page load and still use the tool." },
+  { q:'What formats can I upload and export?', a:'Upload: JPEG, PNG, WebP, GIF, BMP, AVIF. Export: WebP (recommended), JPEG, PNG.' },
+  { q:'What quality setting should I use?', a:'For photos, quality 75–85 is the sweet spot — minimal visual difference with 50–70% file size reduction. For logos or screenshots, use 85–95.' },
+  { q:'Why is WebP smaller than JPEG?', a:'WebP uses a more advanced compression algorithm based on VP8 video codec technology, using predictive coding to encode blocks more efficiently. WebP is typically 25–35% smaller than JPEG at equivalent quality.' },
+  { q:'Can I compress multiple images at once?', a:'Yes! Drop multiple images at once. All appear in the Batch Queue and compress automatically. Download all as a ZIP with one click.' },
+  { q:'What does "Target Size (KB)" do?', a:'It runs a binary-search algorithm that automatically tests quality levels to find the highest quality that still produces a file under your specified KB limit. Perfect for email attachments or CMS limits.' },
+  { q:'Will compression change my image dimensions?', a:"No. ImageSqueeze preserves original dimensions — only the file size changes. For resizing, you'd need a separate resize tool." },
+  { q:'Is PNG output lossless?', a:'Yes. PNG is always lossless — the quality slider has no effect. To get smaller files, convert to WebP lossless instead.' },
+  { q:'Is it safe for sensitive/private images?', a:'Absolutely. Since all processing is local, confidential images, medical scans, or private photos never leave your device. The tool is fully safe for sensitive content.' },
+];
+
+const faqContainer = document.getElementById('faq-list');
+faqs.forEach((faq, i) => {
+  const el = document.createElement('div');
+  el.className = 'border border-gray-100 rounded-xl overflow-hidden';
+  el.innerHTML = `
+    <button class="w-full flex items-center justify-between px-5 py-4 text-left bg-white hover:bg-gray-50 transition"
+            onclick="toggleFaq(${i})" aria-expanded="false" id="faq-btn-${i}">
+      <span class="font-semibold text-gray-800 text-sm pr-4">${faq.q}</span>
+      <span id="faq-icon-${i}" class="text-blue-500 text-xl font-light flex-shrink-0 leading-none">+</span>
+    </button>
+    <div class="faq-body bg-gray-50" id="faq-body-${i}">
+      <p class="px-5 py-4 text-gray-500 text-sm leading-relaxed">${faq.a}</p>
+    </div>`;
+  faqContainer.appendChild(el);
+});
+
+function toggleFaq(i) {
+  const body = document.getElementById(`faq-body-${i}`);
+  const icon = document.getElementById(`faq-icon-${i}`);
+  const btn  = document.getElementById(`faq-btn-${i}`);
+  const open = body.classList.toggle('open');
+  icon.textContent = open ? '×' : '+';
+  btn.setAttribute('aria-expanded', String(open));
+}
+
+// ── Persist prefs ──────────────────────────────────────────────
+try {
+  const q = localStorage.getItem('is_q'), f = localStorage.getItem('is_f');
+  if (q) { qualitySlider.value = q; qualityValue.textContent = q + '%'; }
+  if (f) formatSelect.value = f;
+} catch(e) {}
+qualitySlider.addEventListener('change', () => { try { localStorage.setItem('is_q', qualitySlider.value); } catch(e){} });
+formatSelect.addEventListener('change', () => { try { localStorage.setItem('is_f', formatSelect.value); } catch(e){} });
+</script>
+</body>
+</html>

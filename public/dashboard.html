@@ -1,250 +1,436 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard — ReLoop</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>♻️</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-2: #6b7280;
+      --text-3: #9ca3af;
+      --primary: #16a34a;
+      --primary-dark: #15803d;
+      --primary-light: #f0fdf4;
+      --primary-border: #bbf7d0;
+      --blue: #2563eb;
+      --blue-light: #eff6ff;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --amber: #d97706;
+      --amber-light: #fffbeb;
+      --purple: #7c3aed;
+      --purple-light: #f5f3ff;
+      --shadow: 0 1px 3px rgba(0,0,0,.08);
+      --shadow-md: 0 4px 16px rgba(0,0,0,.08);
+      --r: 10px;
+      --r-lg: 14px;
+    }
+    html, body { height: 100%; font-family: 'Inter', -apple-system, sans-serif; }
+    body { background: var(--bg); color: var(--text); display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Navbar ── */
+    .navbar {
+      height: 56px; background: rgba(255,255,255,.95); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border); display: flex; align-items: center;
+      padding: 0 32px; gap: 24px; position: sticky; top: 0; z-index: 100;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 9px; text-decoration: none; color: var(--text); margin-right: 8px; }
+    .nav-logo-icon {
+      width: 28px; height: 28px; background: linear-gradient(135deg, #16a34a, #2563eb);
+      border-radius: 7px; display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: #fff; letter-spacing: -0.5px;
+    }
+    .nav-logo-text { font-size: 1rem; font-weight: 700; letter-spacing: -0.4px; }
+    .nav-logo-text span { color: var(--primary); }
+    .nav-links { display: flex; align-items: center; gap: 2px; flex: 1; }
+    .nav-link { padding: 6px 14px; border-radius: 7px; font-size: 0.875rem; font-weight: 500; color: var(--text-2); text-decoration: none; transition: all .15s; }
+    .nav-link:hover { color: var(--text); background: var(--bg); }
+    .nav-link.active { color: var(--primary); background: var(--primary-light); font-weight: 600; }
+    .nav-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .user-chip { display: flex; align-items: center; gap: 8px; padding: 5px 12px 5px 6px; border: 1px solid var(--border); border-radius: 999px; background: var(--surface); }
+    .user-av { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6875rem; font-weight: 700; color: #fff; }
+    .user-chip-name { font-size: 0.8125rem; font-weight: 600; color: var(--text); display: block; }
+    .user-chip-role { font-size: 0.6875rem; color: var(--text-3); display: block; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 8px; font-size: 0.875rem; font-weight: 500; font-family: inherit; cursor: pointer; border: none; transition: all .15s; text-decoration: none; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-ghost { background: transparent; color: var(--text-2); border: 1px solid var(--border); }
+    .btn-ghost:hover { color: var(--text); background: var(--bg); }
+    .btn-sm { padding: 5px 12px; font-size: 0.8125rem; }
+    .btn-blue { background: var(--blue); color: #fff; }
+    .btn-blue:hover { background: #1d4ed8; }
+    .btn-amber { background: var(--amber-light); color: var(--amber); border: 1px solid #fde68a; }
+    .btn-amber:hover { background: #fef3c7; }
+
+    /* ── Page header ── */
+    .page-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 24px 32px; }
+    .page-header-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .page-title { font-size: 1.375rem; font-weight: 700; letter-spacing: -0.4px; }
+    .page-sub { font-size: 0.875rem; color: var(--text-2); margin-top: 3px; }
+
+    /* ── Content ── */
+    .content { max-width: 1240px; margin: 0 auto; padding: 28px 32px; flex: 1; width: 100%; }
+
+    /* ── Stats grid ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 18px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    .stat-icon.green { background: var(--primary-light); }
+    .stat-icon.blue  { background: var(--blue-light); }
+    .stat-icon.amber { background: var(--amber-light); }
+    .stat-icon.purple { background: var(--purple-light); }
+    .stat-val { font-size: 1.625rem; font-weight: 700; line-height: 1; color: var(--text); }
+    .stat-unit { font-size: 0.875rem; font-weight: 500; color: var(--text-2); }
+    .stat-label { font-size: 0.8125rem; font-weight: 500; color: var(--text-2); margin-top: 3px; }
+    .stat-note { font-size: 0.6875rem; color: var(--text-3); margin-top: 2px; }
+    .stat-skeleton { background: linear-gradient(90deg,#f0f0f0 25%,#e8e8e8 50%,#f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: var(--r-lg); min-height: 82px; }
+    @keyframes shimmer { 0%{background-position:200% 0}100%{background-position:-200% 0} }
+
+    /* ── DBMS callout panels ── */
+    .callout-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+    .callout {
+      border-radius: var(--r-lg);
+      padding: 18px 20px;
+      border: 1px solid;
+      display: flex;
+      gap: 14px;
+    }
+    .callout.acid { background: #eff6ff; border-color: #bfdbfe; }
+    .callout.trigger { background: var(--primary-light); border-color: var(--primary-border); }
+    .callout-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 1px; }
+    .callout-title { font-size: 0.9375rem; font-weight: 700; margin-bottom: 5px; }
+    .callout.acid .callout-title { color: #1e40af; }
+    .callout.trigger .callout-title { color: var(--primary-dark); }
+    .callout-desc { font-size: 0.8125rem; color: var(--text-2); line-height: 1.55; margin-bottom: 10px; }
+    .callout-desc code { background: rgba(0,0,0,.06); padding: 1px 5px; border-radius: 4px; font-size: 0.75rem; }
+    .callout-props { display: flex; gap: 5px; flex-wrap: wrap; }
+    .cprop {
+      font-size: 0.6875rem; font-weight: 600; letter-spacing: .3px;
+      text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
+    }
+    .acid .cprop { background: rgba(37,99,235,.1); color: var(--blue); }
+    .trigger .cprop { background: rgba(22,163,74,.1); color: var(--primary); }
+
+    /* ── Section cards ── */
+    .section-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .section-head-left { display: flex; align-items: center; gap: 12px; }
+    .section-icon {
+      width: 34px; height: 34px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0;
+    }
+    .section-icon.green { background: var(--primary-light); }
+    .section-icon.blue  { background: var(--blue-light); }
+    .section-icon.amber { background: var(--amber-light); }
+    .section-icon.purple { background: var(--purple-light); }
+    .section-title { font-size: 0.9375rem; font-weight: 700; }
+    .section-sub { font-size: 0.8125rem; color: var(--text-2); margin-top: 1px; }
+
+    /* ── Data table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th {
+      text-align: left;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text-3);
+      padding: 10px 16px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #fafafa; }
+    .td-sub { font-size: 0.75rem; color: var(--text-3); margin-top: 2px; }
+    .table-empty { text-align: center; padding: 2.5rem; color: var(--text-2); font-size: 0.9rem; }
+
+    /* ── Badges ── */
+    .badge {
+      display: inline-flex; align-items: center;
+      font-size: 0.6875rem; font-weight: 600;
+      padding: 3px 8px; border-radius: 999px;
+      white-space: nowrap;
+    }
+    .badge-available { background: var(--primary-light); color: var(--primary); }
+    .badge-pending   { background: var(--amber-light);   color: var(--amber); }
+    .badge-accepted  { background: var(--blue-light);    color: var(--blue); }
+    .badge-completed { background: var(--primary-light); color: var(--primary-dark); }
+    .badge-rejected  { background: var(--red-light);     color: var(--red); }
+
+    /* ── DBMS result modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.4); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; z-index: 200;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity .2s;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+    .modal {
+      background: var(--surface); border-radius: var(--r-lg); width: 100%; max-width: 560px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2); animation: modalIn .18s ease; max-height: 90vh; overflow-y: auto;
+    }
+    @keyframes modalIn { from { transform: scale(.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px 0; }
+    .modal-title { font-size: 1.0625rem; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--text-3); cursor: pointer; padding: 4px; border-radius: 6px; font-size: 1.1rem; transition: all .15s; }
+    .modal-close:hover { background: var(--bg); color: var(--text); }
+    .modal-body { padding: 14px 20px 20px; }
+    .modal-footer { padding: 12px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+
+    .result-block {
+      border-radius: 10px; padding: 16px; margin-bottom: 12px; border-left: 3px solid;
+    }
+    .result-block.blue { background: var(--blue-light); border-color: var(--blue); }
+    .result-block.green { background: var(--primary-light); border-color: var(--primary); }
+    .result-block.gray { background: var(--bg); border-color: var(--border); }
+    .result-block-title { font-size: 0.875rem; font-weight: 700; margin-bottom: 10px; }
+    .result-block.blue .result-block-title { color: #1e40af; }
+    .result-block.green .result-block-title { color: var(--primary-dark); }
+    .result-rows { display: flex; flex-direction: column; gap: 7px; }
+    .result-row { display: flex; align-items: baseline; gap: 10px; font-size: 0.875rem; flex-wrap: wrap; }
+    .rk { font-weight: 600; color: var(--text-2); min-width: 150px; flex-shrink: 0; font-size: 0.8125rem; }
+    .rv { color: var(--text); }
+    .rcode { background: rgba(0,0,0,.06); padding: 1px 6px; border-radius: 4px; font-size: 0.8125rem; font-family: monospace; }
+    .result-note { font-size: 0.8125rem; color: var(--text-2); line-height: 1.55; }
+
+    /* ── Toast ── */
+    .toast-stack { position: fixed; bottom: 20px; right: 20px; z-index: 999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+    .toast { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-radius: 10px; font-size: 0.875rem; font-weight: 500; color: #fff; min-width: 220px; max-width: 360px; box-shadow: 0 4px 12px rgba(0,0,0,.2); pointer-events: auto; opacity: 0; transform: translateY(8px); transition: all .25s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.hide { opacity: 0; transform: translateY(8px); }
+    .toast-success { background: #15803d; }
+    .toast-error   { background: #b91c1c; }
+    .toast-info    { background: #1d4ed8; }
+    .toast-msg { flex: 1; }
+    .toast-x { background: none; border: none; color: rgba(255,255,255,.7); cursor: pointer; font-size: 0.875rem; }
+
+    /* ── Footer ── */
+    .site-footer { background: var(--surface); border-top: 1px solid var(--border); padding: 16px 32px; }
+    .footer-inner { max-width: 1240px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+    .footer-logo { font-size: 0.875rem; font-weight: 700; }
+    .footer-logo span { color: var(--primary); }
+    .footer-meta { font-size: 0.8125rem; color: var(--text-3); }
+
+    @media (max-width: 1024px) { .stats-row { grid-template-columns: repeat(2,1fr); } .callout-row { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .navbar,.page-header,.content,.site-footer { padding-left: 16px; padding-right: 16px; } .page-header { padding-top: 18px; padding-bottom: 18px; } .stats-row { grid-template-columns: 1fr 1fr; gap: 10px; } }
+    @media (max-width: 560px) { .nav-links { display: none; } .stats-row { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
 
-  <!-- ══════════════════════ TOP APP BAR ══════════════════════ -->
-  <header class="app-bar">
-    <div class="app-bar-inner">
-      <a href="marketplace.html" class="app-bar-brand">
-        <span class="logo-mark">♻</span>
-        <span>ReLoop</span>
-      </a>
-
-      <nav class="app-bar-nav">
-        <a href="marketplace.html" class="nav-link">Marketplace</a>
-        <a href="dashboard.html" class="nav-link active">Dashboard</a>
-      </nav>
-
-      <div id="navUserSection" class="app-bar-actions">
-        <!-- Injected by app.js -->
-      </div>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="marketplace.html" class="nav-logo">
+      <div class="nav-logo-icon">RL</div>
+      <span class="nav-logo-text">Re<span>Loop</span></span>
+    </a>
+    <div class="nav-links">
+      <a href="marketplace.html" class="nav-link">Marketplace</a>
+      <a href="dashboard.html" class="nav-link active">Dashboard</a>
     </div>
-  </header>
+    <div class="nav-right" id="navUserSection">
+      <!-- injected by JS -->
+    </div>
+  </nav>
 
-  <!-- ══════════════════════ PAGE HEADER ══════════════════════ -->
+  <!-- Page header -->
   <div class="page-header">
     <div class="page-header-inner">
       <div>
         <h1 class="page-title">Impact Dashboard</h1>
-        <p class="page-subtitle">Your environmental impact, activity, and DBMS feature demonstrations</p>
+        <p class="page-sub">Your environmental impact, activity, and DBMS concept demonstrations</p>
       </div>
-      <div id="roleIndicatorBox">
-        <!-- Injected by JS -->
-      </div>
+      <div id="roleIndicatorBox"></div>
     </div>
   </div>
 
-  <!-- ══════════════════════ MAIN CONTENT ══════════════════════ -->
-  <main class="page-content">
+  <!-- Main content -->
+  <div class="content">
 
-    <!-- ── IMPACT METRICS (from SQL VIEW) ── -->
-    <section class="dashboard-section">
-      <div class="section-header">
-        <div class="section-header-left">
-          <span class="section-icon blue">📊</span>
-          <div>
-            <h2 class="section-title">Environmental Impact</h2>
-            <p class="section-subtitle">Data fetched from SQL View: <code>UserImpactDashboard</code></p>
-          </div>
-        </div>
-        <span class="concept-tag view-tag">SQL VIEW</span>
-      </div>
+    <!-- Stat cards -->
+    <div class="stats-row" id="impactMetricsContainer">
+      <div class="stat-skeleton"></div>
+      <div class="stat-skeleton"></div>
+      <div class="stat-skeleton"></div>
+      <div class="stat-skeleton"></div>
+    </div>
 
-      <div class="stats-grid" id="impactMetricsContainer">
-        <!-- Injected by JS: 4 × .stat-card -->
-        <div class="stat-card stat-skeleton"></div>
-        <div class="stat-card stat-skeleton"></div>
-        <div class="stat-card stat-skeleton"></div>
-        <div class="stat-card stat-skeleton"></div>
-      </div>
-    </section>
-
-    <!-- ── DBMS CONCEPT CALLOUTS ── -->
-    <div class="concept-callouts-row">
-      <div class="concept-callout acid">
+    <!-- DBMS concept callouts -->
+    <div class="callout-row">
+      <div class="callout acid">
         <div class="callout-icon">🔒</div>
-        <div class="callout-body">
-          <h3 class="callout-title">ACID Transaction with Row Locking</h3>
-          <p class="callout-desc">When a Generator accepts an exchange request, the backend executes a serialized transaction with <code>WITH (UPDLOCK, ROWLOCK)</code> on the <code>WasteListings</code> row. This atomically marks the listing "Accepted" and rejects all competing pending requests — preventing double-booking race conditions.</p>
+        <div>
+          <div class="callout-title">ACID Transaction with Row Locking</div>
+          <p class="callout-desc">Accepting a request executes an atomic batch: <code>UPDATE ExchangeRequests</code>, <code>UPDATE WasteListings</code>, and rejects competing requests — preventing double-booking race conditions.</p>
           <div class="callout-props">
-            <span class="callout-prop">Atomicity</span>
-            <span class="callout-prop">Consistency</span>
-            <span class="callout-prop">Isolation</span>
-            <span class="callout-prop">Durability</span>
+            <span class="cprop">Atomicity</span>
+            <span class="cprop">Consistency</span>
+            <span class="cprop">Isolation</span>
+            <span class="cprop">Durability</span>
           </div>
         </div>
       </div>
-
-      <div class="concept-callout trigger">
+      <div class="callout trigger">
         <div class="callout-icon">⚡</div>
-        <div class="callout-body">
-          <h3 class="callout-title">AFTER UPDATE Trigger on ExchangeRequests</h3>
-          <p class="callout-desc">Trigger <code>trg_ExchangeRequests_Completed</code> fires automatically when a request status becomes "Completed". It updates <code>WasteListings.status</code> to "Completed" and awards <strong>+10 eco_points</strong> to the Generator — all without any application-level code.</p>
+        <div>
+          <div class="callout-title">AFTER UPDATE Trigger</div>
+          <p class="callout-desc">Trigger <code>trg_ExchangeRequests_Completed</code> fires when status becomes "Completed" — automatically updating <code>WasteListings.status</code> and awarding <strong>+10 eco_points</strong> to the Generator.</p>
           <div class="callout-props">
-            <span class="callout-prop trigger-prop">AFTER UPDATE</span>
-            <span class="callout-prop trigger-prop">ExchangeRequests</span>
-            <span class="callout-prop trigger-prop">WasteListings</span>
-            <span class="callout-prop trigger-prop">Users.eco_points</span>
+            <span class="cprop">AFTER UPDATE</span>
+            <span class="cprop">ExchangeRequests</span>
+            <span class="cprop">WasteListings</span>
+            <span class="cprop">Users.eco_points</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ══════════════════════════════════════════════════════════
-         GENERATOR SECTION
-    ══════════════════════════════════════════════════════════ -->
+    <!-- Generator section -->
     <div id="generatorSection" style="display:none">
 
-      <!-- Incoming Exchange Requests -->
-      <section class="dashboard-section">
-        <div class="section-header">
-          <div class="section-header-left">
-            <span class="section-icon amber">📥</span>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-icon amber">📥</div>
             <div>
-              <h2 class="section-title">Incoming Exchange Requests</h2>
-              <p class="section-subtitle">Recyclers requesting your materials — accept to trigger the ACID transaction</p>
+              <div class="section-title">Incoming Exchange Requests</div>
+              <div class="section-sub">Accept a request to execute the ACID transaction</div>
             </div>
           </div>
-          <span class="badge badge-pending" id="pendingRequestsCount">0 Pending</span>
+          <span class="badge badge-pending" id="pendingRequestsCount" style="font-size:.75rem;padding:4px 10px"></span>
         </div>
-
-        <div class="data-table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Request #</th>
-                <th>Listing</th>
-                <th>Recycler</th>
-                <th>Submitted</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="incomingRequestsTableBody">
-              <tr>
-                <td colspan="6" class="table-empty">Loading requests…</td>
-              </tr>
-            </tbody>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Req #</th><th>Listing</th><th>Recycler</th><th>Submitted</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="incomingRequestsTableBody"><tr><td colspan="6" class="table-empty">Loading…</td></tr></tbody>
           </table>
         </div>
-      </section>
+      </div>
 
-      <!-- My Listings -->
-      <section class="dashboard-section">
-        <div class="section-header">
-          <div class="section-header-left">
-            <span class="section-icon green">📋</span>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-icon green">📋</div>
             <div>
-              <h2 class="section-title">My Waste Listings</h2>
-              <p class="section-subtitle">All listings you have published to the marketplace</p>
+              <div class="section-title">My Listings</div>
+              <div class="section-sub">All waste listings you have published</div>
             </div>
           </div>
-          <a href="marketplace.html" class="btn btn-outlined btn-sm">+ Post New Listing</a>
+          <a href="marketplace.html" class="btn btn-ghost btn-sm">+ New listing</a>
         </div>
-
-        <div class="data-table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Weight</th>
-                <th>CO₂ Potential</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="myListingsTableBody">
-              <tr>
-                <td colspan="5" class="table-empty">Loading listings…</td>
-              </tr>
-            </tbody>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Title</th><th>Category</th><th>Weight</th><th>CO₂ Offset</th><th>Status</th></tr></thead>
+            <tbody id="myListingsTableBody"><tr><td colspan="5" class="table-empty">Loading…</td></tr></tbody>
           </table>
         </div>
-      </section>
+      </div>
 
-    </div><!-- /generatorSection -->
+    </div>
 
-    <!-- ══════════════════════════════════════════════════════════
-         RECYCLER SECTION
-    ══════════════════════════════════════════════════════════ -->
+    <!-- Recycler section -->
     <div id="recyclerSection" style="display:none">
 
-      <section class="dashboard-section">
-        <div class="section-header">
-          <div class="section-header-left">
-            <span class="section-icon purple">🚚</span>
+      <div class="section-card">
+        <div class="section-head">
+          <div class="section-head-left">
+            <div class="section-icon purple">🚚</div>
             <div>
-              <h2 class="section-title">My Exchange Requests</h2>
-              <p class="section-subtitle">Track your material requests — mark accepted exchanges complete to fire the SQL Trigger</p>
+              <div class="section-title">My Exchange Requests</div>
+              <div class="section-sub">Mark accepted exchanges complete to fire the SQL trigger</div>
             </div>
           </div>
-          <a href="marketplace.html" class="btn btn-outlined btn-sm">Browse Marketplace</a>
+          <a href="marketplace.html" class="btn btn-ghost btn-sm">Browse marketplace</a>
         </div>
-
-        <div class="data-table-wrap">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Request #</th>
-                <th>Listing</th>
-                <th>Category</th>
-                <th>Weight</th>
-                <th>Generator</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="myRequestsTableBody">
-              <tr>
-                <td colspan="6" class="table-empty">Loading requests…</td>
-              </tr>
-            </tbody>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Req #</th><th>Listing</th><th>Category</th><th>Weight</th><th>Generator</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody id="myRequestsTableBody"><tr><td colspan="7" class="table-empty">Loading…</td></tr></tbody>
           </table>
         </div>
-      </section>
+      </div>
 
-    </div><!-- /recyclerSection -->
+    </div>
 
-  </main>
+  </div>
 
-  <!-- ══════════════════════ FOOTER ══════════════════════ -->
+  <!-- Footer -->
   <footer class="site-footer">
     <div class="footer-inner">
-      <span class="footer-logo">♻ ReLoop</span>
-      <p>A DBMS mini-project · Cloudflare D1 · ACID Transactions · SQL Triggers · SQL Views</p>
+      <span class="footer-logo">Re<span>Loop</span></span>
+      <span class="footer-meta">ACID Transactions · SQL Triggers · SQL Views · Cloudflare D1</span>
     </div>
   </footer>
 
-  <!-- ══════════════════════ DBMS VERIFICATION DIALOG ══════════════════════ -->
-  <div class="dialog-overlay" id="dbmsVerificationModal">
-    <div class="dialog dialog-lg" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <div class="dialog-header">
-        <h2 class="dialog-title" id="modalTitle">DBMS Operation Result</h2>
-        <button class="dialog-close" onclick="closeVerificationModal()" aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+  <!-- DBMS Verification Modal -->
+  <div class="modal-overlay" id="dbmsVerificationModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modalTitle">DBMS Result</h2>
+        <button class="modal-close" onclick="closeVerificationModal()">✕</button>
       </div>
-      <div class="dialog-body" id="modalBody">
-        <!-- Injected by JS -->
-      </div>
-      <div class="dialog-actions" style="border-top: 1px solid var(--border); padding: 1rem 1.5rem;">
-        <button class="btn btn-filled" onclick="closeVerificationModal()">Got it</button>
+      <div class="modal-body" id="modalBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeVerificationModal()">Got it</button>
       </div>
     </div>
   </div>
 
-  <!-- ══════════════════════ TOAST STACK ══════════════════════ -->
   <div class="toast-stack" id="toastStack"></div>
 
   <script src="js/app.js"></script>
-  <script>
-    initDashboardPage();
-  </script>
+  <script>initDashboardPage();</script>
 </body>
 </html>

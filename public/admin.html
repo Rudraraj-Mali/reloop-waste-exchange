@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ReLoop Admin Panel</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f0f11;
+      --sidebar:   #1a1a1f;
+      --card:      #1e1e24;
+      --border:    #2a2a35;
+      --accent:    #3b82f6;
+      --accent-h:  #2563eb;
+      --text:      #e2e8f0;
+      --muted:     #64748b;
+      --success:   #22c55e;
+      --danger:    #ef4444;
+      --warning:   #f59e0b;
+      --mono:      'Courier New', Courier, monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 14px;
+      min-height: 100vh;
+    }
+
+    /* ─── LOGIN SCREEN ─────────────────────────────────────────────────── */
+    #loginScreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 0%, #1e2d4a 0%, var(--bg) 70%);
+    }
+
+    .login-box {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 25px 50px rgba(0,0,0,.6);
+    }
+
+    .login-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 32px;
+      justify-content: center;
+    }
+
+    .login-logo .icon {
+      width: 40px;
+      height: 40px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .login-logo span {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.5px;
+    }
+
+    .login-box h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+
+    .login-box p.subtitle {
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+      margin-top: 4px;
+    }
+
+    .btn-primary:hover { background: var(--accent-h); }
+
+    #loginError {
+      background: rgba(239,68,68,.12);
+      border: 1px solid rgba(239,68,68,.35);
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    /* ─── ADMIN LAYOUT ─────────────────────────────────────────────────── */
+    #adminUI {
+      display: none;
+      flex-direction: row;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      min-height: 100vh;
+      background: var(--sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo .icon {
+      width: 34px;
+      height: 34px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-logo .brand {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .sidebar-logo .badge {
+      font-size: 10px;
+      background: rgba(59,130,246,.2);
+      color: var(--accent);
+      border-radius: 4px;
+      padding: 2px 6px;
+      margin-left: auto;
+    }
+
+    .sidebar nav {
+      flex: 1;
+      padding: 12px 10px;
+    }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      padding: 8px 10px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .15s, color .15s;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+
+    .nav-item:hover { background: rgba(255,255,255,.05); color: var(--text); }
+
+    .nav-item.active {
+      background: rgba(59,130,246,.15);
+      color: var(--accent);
+    }
+
+    .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .logout-btn {
+      width: 100%;
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.25);
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 9px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s;
+    }
+
+    .logout-btn:hover { background: rgba(239,68,68,.2); }
+
+    /* Main content */
+    .main-content {
+      margin-left: 240px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .topbar {
+      height: 60px;
+      background: var(--sidebar);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 28px;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar h1 {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .topbar .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--success);
+    }
+
+    .topbar .status-text {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .content-area {
+      padding: 28px;
+      flex: 1;
+    }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-bottom: 24px;
+    }
+
+    /* ─── STAT CARDS ───────────────────────────────────────────────────── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--accent);
+      border-radius: 12px 12px 0 0;
+    }
+
+    .stat-card .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 30px;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    .stat-card .stat-icon {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      font-size: 22px;
+      opacity: .3;
+    }
+
+    /* ─── QUERY RUNNER ─────────────────────────────────────────────────── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    textarea#sqlInput {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #a5f3a5;
+      font-family: var(--mono);
+      font-size: 13px;
+      padding: 14px 16px;
+      resize: vertical;
+      outline: none;
+      min-height: 100px;
+      transition: border-color .2s;
+    }
+
+    textarea#sqlInput:focus { border-color: var(--accent); }
+
+    .quick-cmds {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .qbtn {
+      background: rgba(59,130,246,.1);
+      border: 1px solid rgba(59,130,246,.25);
+      color: #93c5fd;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+
+    .qbtn:hover {
+      background: rgba(59,130,246,.2);
+      border-color: rgba(59,130,246,.5);
+      color: #bfdbfe;
+    }
+
+    .qbtn.danger {
+      background: rgba(239,68,68,.1);
+      border-color: rgba(239,68,68,.25);
+      color: #fca5a5;
+    }
+
+    .qbtn.danger:hover {
+      background: rgba(239,68,68,.2);
+      border-color: rgba(239,68,68,.5);
+    }
+
+    .run-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .btn-run {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 24px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-run:hover { background: var(--accent-h); }
+
+    .btn-run:disabled { opacity: .5; cursor: not-allowed; }
+
+    .btn-clear {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: color .2s, border-color .2s;
+    }
+
+    .btn-clear:hover { color: var(--text); border-color: #555; }
+
+    .query-status {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* Results */
+    #queryResults {
+      margin-top: 20px;
+    }
+
+    .result-error {
+      background: rgba(239,68,68,.1);
+      border: 1px solid rgba(239,68,68,.3);
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: #fca5a5;
+      font-family: var(--mono);
+      font-size: 13px;
+    }
+
+    .result-info {
+      background: rgba(59,130,246,.08);
+      border: 1px solid rgba(59,130,246,.2);
+      border-radius: 8px;
+      padding: 14px 16px;
+      color: #93c5fd;
+      font-size: 13px;
+    }
+
+    .result-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 12px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    table.result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+    }
+
+    table.result-table th {
+      background: rgba(59,130,246,.12);
+      color: var(--accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 10.5px;
+      letter-spacing: 0.4px;
+      padding: 10px 14px;
+      text-align: left;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.result-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid rgba(42,42,53,.8);
+      color: var(--text);
+      max-width: 280px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    table.result-table tr:last-child td { border-bottom: none; }
+
+    table.result-table tr:hover td { background: rgba(255,255,255,.03); }
+
+    table.result-table td.null-val { color: var(--muted); font-style: italic; }
+
+    /* Spinner */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,.2);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── USERS TABLE ──────────────────────────────────────────────────── */
+    .table-wrap table th { cursor: default; }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+    /* Responsive rough */
+    @media (max-width: 1100px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     LOGIN SCREEN
+════════════════════════════════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icon">♻️</div>
+      <span>ReLoop</span>
+    </div>
+    <h2>Admin Sign In</h2>
+    <p class="subtitle">Enter your admin credentials to continue</p>
+
+    <div id="loginError">⚠️ Invalid email or password. Please try again.</div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="adminEmail" placeholder="admin@gmail.com" autocomplete="username" />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="adminPassword" placeholder="••••••••" autocomplete="current-password" />
+    </div>
+    <button class="btn-primary" onclick="handleLogin()">Sign In to Admin Panel</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     ADMIN UI
+════════════════════════════════════════════════════════════════════════ -->
+<div id="adminUI">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="icon">♻️</div>
+      <div class="brand">ReLoop</div>
+      <div class="badge">Admin</div>
+    </div>
+
+    <nav>
+      <div class="nav-section-label">Navigation</div>
+      <div class="nav-item active" onclick="showSection('dashboard', this)">
+        <span class="nav-icon">📊</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="showSection('queryRunner', this)">
+        <span class="nav-icon">⚡</span> Query Runner
+      </div>
+      <div class="nav-item" onclick="showSection('users', this)">
+        <span class="nav-icon">👥</span> Users
+      </div>
+      <div class="nav-item" onclick="showSection('listings', this)">
+        <span class="nav-icon">📦</span> Listings
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" onclick="handleLogout()">⬅ Logout</button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main-content">
+    <div class="topbar">
+      <h1 id="topbarTitle">Dashboard</h1>
+      <div class="status-dot"></div>
+      <span class="status-text">Connected</span>
+    </div>
+
+    <div class="content-area">
+
+      <!-- ── DASHBOARD ── -->
+      <div id="section-dashboard" class="section active">
+        <div class="section-title">Dashboard</div>
+        <div class="section-sub">Live overview of your ReLoop platform.</div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">👤</div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value" id="statUsers">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-label">Total Listings</div>
+            <div class="stat-value" id="statListings">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🔄</div>
+            <div class="stat-label">Total Requests</div>
+            <div class="stat-value" id="statRequests">—</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🌿</div>
+            <div class="stat-label">CO₂ Saved (kg)</div>
+            <div class="stat-value" id="statCO2">—</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">📋 Recent Users</div>
+          <div id="dashUsersWrap"><div class="result-info">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── QUERY RUNNER ── -->
+      <div id="section-queryRunner" class="section">
+        <div class="section-title">SQL Query Runner</div>
+        <div class="section-sub">Execute raw SQL against the ReLoop database. Use with care.</div>
+
+        <div class="card">
+          <div class="card-title">⚡ Quick Commands</div>
+          <div class="quick-cmds">
+            <button class="qbtn" onclick="runQuick('SELECT * FROM Users ORDER BY user_id')">All Users</button>
+            <button class="qbtn" onclick="runQuick(`SELECT wl.*, wc.name as category, u.name as generator FROM WasteListings wl JOIN WasteCategories wc ON wl.category_id=wc.category_id JOIN Users u ON wl.generator_id=u.user_id ORDER BY wl.listing_id DESC`)">All Listings</button>
+            <button class="qbtn" onclick="runQuick(`SELECT er.*, wl.title as listing, u.name as recycler FROM ExchangeRequests er JOIN WasteListings wl ON er.listing_id=wl.listing_id JOIN Users u ON er.recycler_id=u.user_id ORDER BY er.request_id DESC`)">All Requests</button>
+            <button class="qbtn" onclick="runQuick(`SELECT name FROM sqlite_master WHERE type='table'`)">Show Tables</button>
+            <button class="qbtn" onclick="runQuick('SELECT * FROM UserImpactDashboard')">Impact View</button>
+            <button class="qbtn" onclick="runQuick('SELECT * FROM WasteCategories ORDER BY category_id')">Categories</button>
+            <button class="qbtn" onclick="runQuick(`SELECT * FROM ExchangeRequests WHERE request_status='Pending'`)">Pending Requests</button>
+            <button class="qbtn danger" onclick="runQuick(`UPDATE Users SET eco_points=0 WHERE user_type='Generator'`)">Reset Points</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">🖊 SQL Editor</div>
+          <textarea id="sqlInput" rows="5" placeholder="-- Type your SQL here, e.g.
+SELECT * FROM Users WHERE user_type = 'Generator' LIMIT 10;
+SELECT COUNT(*) as total FROM WasteListings;"></textarea>
+          <div class="run-row">
+            <button class="btn-run" id="runBtn" onclick="executeQuery()">
+              ▶ Run Query
+            </button>
+            <button class="btn-clear" onclick="clearQuery()">Clear</button>
+            <span class="query-status" id="queryStatus"></span>
+          </div>
+          <div id="queryResults"></div>
+        </div>
+      </div>
+
+      <!-- ── USERS ── -->
+      <div id="section-users" class="section">
+        <div class="section-title">Users</div>
+        <div class="section-sub">All registered users on the platform.</div>
+        <div class="card">
+          <div class="card-title">👥 User Registry</div>
+          <div id="usersTableWrap"><div class="result-info">Loading…</div></div>
+        </div>
+      </div>
+
+      <!-- ── LISTINGS ── -->
+      <div id="section-listings" class="section">
+        <div class="section-title">Listings</div>
+        <div class="section-sub">All waste listings posted by generators.</div>
+        <div class="card">
+          <div class="card-title">📦 Waste Listings</div>
+          <div id="listingsTableWrap"><div class="result-info">Loading…</div></div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /main-content -->
+</div><!-- /adminUI -->
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     INLINE ADMIN JAVASCRIPT
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+  'use strict';
+
+  const ADMIN_KEY = 'reloop_admin_2024';
+  const ADMIN_EMAIL = 'admin@gmail.com';
+  const ADMIN_PASS  = '12345678';
+
+  /* ── Boot ─────────────────────────────────────────────────────────── */
+  (function boot() {
+    if (localStorage.getItem('reloop_admin') === 'authenticated') {
+      showAdminUI();
+    } else {
+      document.getElementById('loginScreen').style.display = 'flex';
+    }
+  })();
+
+  /* ── Login ────────────────────────────────────────────────────────── */
+  function handleLogin() {
+    const email = document.getElementById('adminEmail').value.trim();
+    const pass  = document.getElementById('adminPassword').value;
+    const errEl = document.getElementById('loginError');
+
+    if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+      errEl.style.display = 'none';
+      localStorage.setItem('reloop_admin', 'authenticated');
+      showAdminUI();
+    } else {
+      errEl.style.display = 'block';
+    }
+  }
+
+  // Allow Enter key on login form
+  document.getElementById('adminPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleLogin();
+  });
+  document.getElementById('adminEmail').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleLogin();
+  });
+
+  /* ── Logout ───────────────────────────────────────────────────────── */
+  function handleLogout() {
+    localStorage.removeItem('reloop_admin');
+    document.getElementById('adminUI').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    // Clear password field for security
+    document.getElementById('adminPassword').value = '';
+  }
+
+  /* ── Show Admin UI ────────────────────────────────────────────────── */
+  function showAdminUI() {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminUI').style.display = 'flex';
+    loadDashboard();
+  }
+
+  /* ── Section Navigation ───────────────────────────────────────────── */
+  function showSection(sectionId, navEl) {
+    // Hide all sections
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    // Deactivate all nav items
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+    document.getElementById('section-' + sectionId).classList.add('active');
+    if (navEl) navEl.classList.add('active');
+
+    // Update topbar title
+    const titles = {
+      dashboard: 'Dashboard',
+      queryRunner: 'Query Runner',
+      users: 'Users',
+      listings: 'Listings'
+    };
+    document.getElementById('topbarTitle').textContent = titles[sectionId] || sectionId;
+
+    // Lazy-load section data
+    if (sectionId === 'users') loadUsers();
+    if (sectionId === 'listings') loadListings();
+  }
+
+  /* ── API Helper ───────────────────────────────────────────────────── */
+  async function runSQL(sql) {
+    const res = await fetch('/api/admin/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sql, adminKey: ADMIN_KEY })
+    });
+    return res.json();
+  }
+
+  /* ── Render Table ─────────────────────────────────────────────────── */
+  function renderTable(data, targetEl) {
+    if (!data.success) {
+      targetEl.innerHTML = `<div class="result-error">⛔ ${escHtml(data.error || 'Unknown error')}</div>`;
+      return;
+    }
+    const rows = data.results || [];
+    const cols = data.columns || (rows.length > 0 ? Object.keys(rows[0]) : []);
+
+    if (rows.length === 0) {
+      targetEl.innerHTML = `<div class="result-info">✅ Query executed — 0 rows returned.</div>`;
+      return;
+    }
+
+    let html = `<div class="result-meta">${rows.length} row${rows.length !== 1 ? 's' : ''} returned</div>
+      <div class="table-wrap"><table class="result-table"><thead><tr>`;
+    cols.forEach(c => { html += `<th>${escHtml(String(c))}</th>`; });
+    html += '</tr></thead><tbody>';
+    rows.forEach(row => {
+      html += '<tr>';
+      cols.forEach(c => {
+        const val = row[c];
+        if (val === null || val === undefined) {
+          html += `<td class="null-val">null</td>`;
+        } else {
+          html += `<td title="${escHtml(String(val))}">${escHtml(String(val))}</td>`;
+        }
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+    targetEl.innerHTML = html;
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── Query Runner ─────────────────────────────────────────────────── */
+  async function executeQuery() {
+    const sql = document.getElementById('sqlInput').value.trim();
+    if (!sql) return;
+
+    const btn = document.getElementById('runBtn');
+    const statusEl = document.getElementById('queryStatus');
+    const resultsEl = document.getElementById('queryResults');
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Running…';
+    statusEl.textContent = '';
+    resultsEl.innerHTML = '';
+
+    const start = Date.now();
+    try {
+      const data = await runSQL(sql);
+      const elapsed = Date.now() - start;
+      statusEl.textContent = `${elapsed}ms`;
+
+      if (data.success) {
+        const rowCount = (data.results || []).length;
+        statusEl.textContent = `✅ ${rowCount} row${rowCount !== 1 ? 's' : ''} · ${elapsed}ms`;
+      } else {
+        statusEl.textContent = `⛔ Error · ${elapsed}ms`;
+      }
+
+      renderTable(data, resultsEl);
+    } catch (err) {
+      resultsEl.innerHTML = `<div class="result-error">⛔ Network error: ${escHtml(err.message)}</div>`;
+      statusEl.textContent = 'Failed';
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '▶ Run Query';
+    }
+  }
+
+  function clearQuery() {
+    document.getElementById('sqlInput').value = '';
+    document.getElementById('queryResults').innerHTML = '';
+    document.getElementById('queryStatus').textContent = '';
+  }
+
+  function runQuick(sql) {
+    // Switch to Query Runner section
+    const qrNavItem = document.querySelectorAll('.nav-item')[1];
+    showSection('queryRunner', qrNavItem);
+    document.getElementById('sqlInput').value = sql;
+    executeQuery();
+  }
+
+  // Ctrl+Enter to run query
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      const active = document.getElementById('section-queryRunner');
+      if (active && active.classList.contains('active')) executeQuery();
+    }
+  });
+
+  /* ── Dashboard ────────────────────────────────────────────────────── */
+  async function loadDashboard() {
+    loadStats();
+    // Recent users preview
+    const data = await runSQL('SELECT user_id, name, email, user_type, eco_points FROM Users ORDER BY user_id DESC LIMIT 8');
+    renderTable(data, document.getElementById('dashUsersWrap'));
+  }
+
+  async function loadStats() {
+    const queries = [
+      { sql: 'SELECT COUNT(*) as count FROM Users', elId: 'statUsers' },
+      { sql: 'SELECT COUNT(*) as count FROM WasteListings', elId: 'statListings' },
+      { sql: 'SELECT COUNT(*) as count FROM ExchangeRequests', elId: 'statRequests' },
+      { sql: 'SELECT COALESCE(SUM(co2_saved_kg), 0) as count FROM ExchangeRequests WHERE request_status="Accepted"', elId: 'statCO2' }
+    ];
+
+    for (const q of queries) {
+      try {
+        const data = await runSQL(q.sql);
+        if (data.success && data.results && data.results.length > 0) {
+          const val = data.results[0]['count'];
+          const el = document.getElementById(q.elId);
+          if (el) el.textContent = (val !== null && val !== undefined) ? Number(val).toLocaleString() : '0';
+        }
+      } catch (e) { /* skip silently */ }
+    }
+  }
+
+  /* ── Users Section ────────────────────────────────────────────────── */
+  async function loadUsers() {
+    const wrap = document.getElementById('usersTableWrap');
+    wrap.innerHTML = '<div class="result-info">Loading users…</div>';
+    const data = await runSQL('SELECT user_id, name, email, user_type, eco_points FROM Users ORDER BY user_id');
+    renderTable(data, wrap);
+  }
+
+  /* ── Listings Section ─────────────────────────────────────────────── */
+  async function loadListings() {
+    const wrap = document.getElementById('listingsTableWrap');
+    wrap.innerHTML = '<div class="result-info">Loading listings…</div>';
+    const data = await runSQL(
+      `SELECT wl.listing_id, wl.title, wc.name as category, u.name as generator, wl.quantity_kg, wl.listing_status
+       FROM WasteListings wl
+       JOIN WasteCategories wc ON wl.category_id = wc.category_id
+       JOIN Users u ON wl.generator_id = u.user_id
+       ORDER BY wl.listing_id DESC`
+    );
+    renderTable(data, wrap);
+  }
+</script>
+
+</body>
+</html>

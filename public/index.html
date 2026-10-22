@@ -4,260 +4,620 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ReLoop — Sign In</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { background: var(--surface-dim); }
-    .auth-page-wrap {
-      min-height: 100vh;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f5f5f7;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --text: #111827;
+      --text-2: #6b7280;
+      --text-3: #9ca3af;
+      --primary: #16a34a;
+      --primary-dark: #15803d;
+      --primary-light: #f0fdf4;
+      --primary-border: #bbf7d0;
+      --blue: #2563eb;
+      --blue-light: #eff6ff;
+      --red: #dc2626;
+      --red-light: #fef2f2;
+      --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-lg: 0 10px 40px rgba(0,0,0,.12), 0 4px 16px rgba(0,0,0,.06);
+      --r: 10px;
+      --r-lg: 16px;
+    }
+    html, body { height: 100%; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; }
+    body {
+      background: var(--bg);
+      color: var(--text);
       display: flex;
       flex-direction: column;
+      min-height: 100vh;
     }
 
-    /* Mini top bar for auth page */
-    .auth-top-bar {
-      height: 64px;
-      background: var(--surface);
+    /* ── Top bar ── */
+    .top-bar {
+      height: 56px;
+      background: rgba(255,255,255,.92);
+      backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
-      padding: 0 40px;
+      padding: 0 32px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .logo-icon {
+      width: 30px;
+      height: 30px;
+      background: linear-gradient(135deg, #16a34a, #2563eb);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .logo-text {
+      font-size: 1.0625rem;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      color: var(--text);
+    }
+    .logo-text span { color: var(--primary); }
 
+    /* ── Main layout ── */
     .auth-main {
       flex: 1;
-      display: grid;
-      place-items: center;
-      padding: 40px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 20px;
     }
-
-    .auth-split {
-      display: grid;
-      grid-template-columns: 1fr 440px;
-      max-width: 1040px;
+    .auth-card {
       width: 100%;
-      min-height: 620px;
-      background: var(--surface);
-      border-radius: var(--r-xl);
-      overflow: hidden;
-      box-shadow: var(--shadow-3);
-      border: 1px solid var(--border);
-    }
-
-    @media (max-width: 860px) {
-      .auth-split { grid-template-columns: 1fr; }
-      .auth-hero { display: none; }
-    }
-
-    .form-row {
+      max-width: 920px;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      grid-template-columns: 1fr 400px;
+      background: var(--surface);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      overflow: hidden;
     }
 
-    @media (max-width: 480px) {
-      .form-row { grid-template-columns: 1fr; }
+    /* ── Hero panel ── */
+    .hero-panel {
+      background: linear-gradient(160deg, #0f4c27 0%, #064e3b 60%, #1e3a5f 100%);
+      padding: 48px 40px;
+      display: flex;
+      flex-direction: column;
+      color: #fff;
+    }
+    .hero-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.6px;
+      margin-bottom: 48px;
+    }
+    .hero-logo span { color: #6ee7b7; }
+    .hero-tagline {
+      font-size: 1.625rem;
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+    }
+    .hero-sub {
+      font-size: 0.9375rem;
+      line-height: 1.65;
+      color: rgba(255,255,255,.7);
+      margin-bottom: 40px;
+    }
+    .feature-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: auto;
+    }
+    .feature-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.875rem;
+      color: rgba(255,255,255,.85);
+      line-height: 1.5;
+    }
+    .feature-dot {
+      width: 20px;
+      height: 20px;
+      background: rgba(110, 231, 183, .2);
+      border: 1px solid rgba(110, 231, 183, .4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      color: #6ee7b7;
+    }
+
+    /* ── Form panel ── */
+    .form-panel {
+      padding: 40px 36px;
+      display: flex;
+      flex-direction: column;
+    }
+    .form-panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      margin-bottom: 4px;
+    }
+    .form-panel-sub {
+      font-size: 0.875rem;
+      color: var(--text-2);
+      margin-bottom: 28px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      margin-bottom: 28px;
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 8px 0;
+      border: none;
+      background: transparent;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-2);
+      cursor: pointer;
+      transition: all .15s;
+      font-family: inherit;
+    }
+    .tab-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 3px rgba(0,0,0,.1);
+      font-weight: 600;
+    }
+
+    /* ── Form elements ── */
+    .field { margin-bottom: 18px; }
+    .field label {
+      display: block;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .field input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      font-size: 0.9375rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+    }
+    .field input:hover { border-color: #d1d5db; }
+    .field input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(22,163,74,.1);
+    }
+    .field input::placeholder { color: var(--text-3); }
+    .field .hint {
+      font-size: 0.75rem;
+      color: var(--text-3);
+      margin-top: 5px;
+    }
+
+    /* Role cards */
+    .role-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .role-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 16px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      cursor: pointer;
+      transition: all .15s;
+      text-align: center;
+    }
+    .role-card:hover { border-color: var(--primary); background: var(--primary-light); }
+    .role-card.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .role-card input { display: none; }
+    .role-icon { font-size: 1.5rem; }
+    .role-name { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+    .role-desc { font-size: 0.75rem; color: var(--text-2); line-height: 1.4; }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%;
+      padding: 11px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--r);
+      font-size: 0.9375rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      margin-top: 6px;
+      transition: background .15s;
+    }
+    .submit-btn:hover { background: var(--primary-dark); }
+    .submit-btn:active { transform: translateY(1px); }
+    .submit-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    /* Error message */
+    .form-error {
+      display: none;
+      background: var(--red-light);
+      border: 1px solid #fecaca;
+      color: var(--red);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      margin-bottom: 16px;
+    }
+    .form-error.show { display: block; }
+
+    /* Already logged in banner */
+    .session-banner {
+      background: var(--primary-light);
+      border: 1px solid var(--primary-border);
+      border-radius: var(--r);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .session-banner-name {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .session-banner-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .sb-btn {
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      transition: all .15s;
+    }
+    .sb-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .sb-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .sb-btn.primary:hover { background: var(--primary-dark); }
+
+    /* Toast stack */
+    .toast-stack {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #fff;
+      min-width: 240px;
+      max-width: 380px;
+      box-shadow: 0 4px 12px rgba(0,0,0,.2);
+      pointer-events: auto;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all .25s;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.hide { opacity: 0; transform: translateY(8px); }
+    .toast-success { background: #15803d; }
+    .toast-error   { background: #b91c1c; }
+    .toast-info    { background: #1d4ed8; }
+    .toast-msg { flex: 1; }
+    .toast-x {
+      background: none; border: none; color: rgba(255,255,255,.7);
+      cursor: pointer; font-size: 0.875rem; padding: 0 2px;
+    }
+
+    @media (max-width: 780px) {
+      .auth-card { grid-template-columns: 1fr; }
+      .hero-panel { display: none; }
     }
   </style>
 </head>
 <body>
-<div class="auth-page-wrap">
 
-  <!-- Minimal top bar -->
-  <div class="auth-top-bar">
-    <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
-      <div class="logo-mark">♻️</div>
-      <span class="app-bar-brand">Re<span class="accent">Loop</span></span>
+  <!-- Top bar -->
+  <nav class="top-bar">
+    <a href="index.html" class="logo">
+      <div class="logo-icon">RL</div>
+      <span class="logo-text">Re<span>Loop</span></span>
     </a>
-  </div>
+  </nav>
 
+  <!-- Auth section -->
   <main class="auth-main">
-    <div class="auth-split">
+    <div class="auth-card">
 
-      <!-- Left: Hero Panel -->
-      <div class="auth-hero">
-        <div class="auth-hero-logo">
-          <div class="auth-logo-mark">♻️</div>
-          <div class="auth-hero-brand">ReLoop</div>
+      <!-- Left: hero -->
+      <div class="hero-panel">
+        <div class="hero-logo">Re<span>Loop</span></div>
+        <div>
+          <h1 class="hero-tagline">Circular Economy,<br>Simplified.</h1>
+          <p class="hero-sub">Connect waste generators with certified recyclers. Track environmental impact in real time.</p>
         </div>
-
-        <div class="auth-hero-content">
-          <h2>Turn Waste into Value.</h2>
-          <p>
-            A professional-grade circular economy platform connecting Waste Generators
-            with certified Recyclers to divert materials from landfills and measure environmental impact.
-          </p>
-
-          <div class="auth-feature-pills">
-            <div class="auth-pill">
-              <span class="auth-pill-icon">🔒</span>
-              <span><strong>ACID Transactions</strong> with Row Locking — prevents double-booking</span>
-            </div>
-            <div class="auth-pill">
-              <span class="auth-pill-icon">⚡</span>
-              <span><strong>Database Triggers</strong> — auto-awards Eco Points on completion</span>
-            </div>
-            <div class="auth-pill">
-              <span class="auth-pill-icon">📊</span>
-              <span><strong>SQL View</strong> <code style="background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px;font-size:.8rem">UserImpactDashboard</code> — live CO₂ metrics</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="font-size:.8125rem;color:rgba(255,255,255,.5);margin-top:40px;">
-          Cloudflare D1 SQL · Node.js · Express · Vanilla JS
-        </div>
+        <ul class="feature-list">
+          <li class="feature-item">
+            <span class="feature-dot">✓</span>
+            <span><strong>ACID Transactions</strong> with row-level locking prevent double-booking race conditions</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-dot">✓</span>
+            <span><strong>SQL Triggers</strong> auto-award eco points on exchange completion</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-dot">✓</span>
+            <span><strong>SQL Views</strong> calculate real-time CO₂ diversion metrics per user</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-dot">✓</span>
+            <span>Cloudflare D1 · Node.js · Express · Vanilla JS</span>
+          </li>
+        </ul>
       </div>
 
-      <!-- Right: Form Panel -->
-      <div class="auth-form-panel">
-        <div class="auth-form-header">
-          <h3>Welcome to ReLoop</h3>
-          <p>Sign in to your account or create a new one.</p>
-        </div>
+      <!-- Right: form -->
+      <div class="form-panel">
 
-        <!-- Segment Tabs -->
-        <div class="segment-control" role="tablist">
-          <button class="segment-btn active" id="tabLogin" onclick="switchTab('login')" role="tab">Sign In</button>
-          <button class="segment-btn" id="tabRegister" onclick="switchTab('register')" role="tab">Create Account</button>
-        </div>
+        <div id="sessionBanner" style="display:none"></div>
 
-        <!-- Sign In Form -->
-        <div id="panelLogin">
-          <form id="formLogin" novalidate>
-            <div class="form-field">
-              <label for="loginEmail">Email address</label>
-              <div class="input-with-icon">
-                <span class="input-icon">✉️</span>
-                <input type="email" id="loginEmail" name="email" placeholder="you@example.com" autocomplete="email" required>
+        <div id="authForms">
+          <h2 class="form-panel-title">Welcome back</h2>
+          <p class="form-panel-sub">Sign in to your account or create a new one.</p>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+            <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+          </div>
+
+          <!-- Sign in form -->
+          <div id="panelLogin">
+            <div class="form-error" id="loginError"></div>
+            <form id="formLogin" novalidate>
+              <div class="field">
+                <label for="loginEmail">Email address</label>
+                <input type="email" id="loginEmail" name="email" placeholder="you@company.com" autocomplete="email" required>
               </div>
-            </div>
-
-            <div class="form-field">
-              <label for="loginPassword">Password</label>
-              <div class="input-with-icon">
-                <span class="input-icon">🔑</span>
+              <div class="field">
+                <label for="loginPassword">Password</label>
                 <input type="password" id="loginPassword" name="password" placeholder="Enter your password" autocomplete="current-password" required>
               </div>
-            </div>
+              <button type="submit" class="submit-btn" id="loginBtn">Sign In</button>
+            </form>
+          </div>
 
-            <button type="submit" class="btn btn-filled" style="width:100%;margin-top:4px;padding:12px;">
-              Sign In
-            </button>
-          </form>
-
-          <!-- Demo Accounts -->
-          <div class="demo-strip">
-            <p>🧪 Quick demo sign-in (pre-seeded accounts):</p>
-            <div class="demo-accounts">
-              <button class="demo-btn" onclick="fillDemo('alice@generator.com','password123')">
-                <div class="demo-btn-avatar gen">🏢</div>
-                <div>
-                  <div class="demo-btn-label">Alice Green</div>
-                  <div class="demo-btn-role">Generator</div>
+          <!-- Register form -->
+          <div id="panelRegister" style="display:none">
+            <div class="form-error" id="registerError"></div>
+            <form id="formRegister" novalidate>
+              <div class="field">
+                <label for="regName">Full name or Organization</label>
+                <input type="text" id="regName" name="name" placeholder="e.g. Metro Supermarket" autocomplete="name" required>
+              </div>
+              <div class="field">
+                <label for="regEmail">Email address</label>
+                <input type="email" id="regEmail" name="email" placeholder="you@company.com" autocomplete="email" required>
+              </div>
+              <div class="field">
+                <label for="regPassword">Password</label>
+                <input type="password" id="regPassword" name="password" placeholder="Create a secure password" autocomplete="new-password" required>
+                <div class="hint">Plain-text storage for academic DBMS demonstration.</div>
+              </div>
+              <div class="field">
+                <label>Account type</label>
+                <div class="role-group">
+                  <label class="role-card selected" id="roleGenCard">
+                    <input type="radio" name="user_type" value="Generator" id="roleGen" checked>
+                    <span class="role-icon">🏭</span>
+                    <span class="role-name">Generator</span>
+                    <span class="role-desc">I produce waste and post listings</span>
+                  </label>
+                  <label class="role-card" id="roleRecCard">
+                    <input type="radio" name="user_type" value="Recycler" id="roleRec">
+                    <span class="role-icon">♻️</span>
+                    <span class="role-name">Recycler</span>
+                    <span class="role-desc">I collect and process recyclables</span>
+                  </label>
                 </div>
-              </button>
-              <button class="demo-btn" onclick="fillDemo('bob@recycler.com','password123')">
-                <div class="demo-btn-avatar rec">🚚</div>
-                <div>
-                  <div class="demo-btn-label">Bob Clean</div>
-                  <div class="demo-btn-role">Recycler</div>
-                </div>
-              </button>
-            </div>
+              </div>
+              <button type="submit" class="submit-btn" id="registerBtn">Create Account</button>
+            </form>
           </div>
         </div>
 
-        <!-- Create Account Form -->
-        <div id="panelRegister" style="display:none;">
-          <form id="formRegister" novalidate>
-
-            <div class="form-field">
-              <label for="regName">Full name / Organization</label>
-              <input type="text" id="regName" name="name" placeholder="e.g. Green Leaf Café or EcoPlast Recyclers" required>
-            </div>
-
-            <div class="form-field">
-              <label for="regEmail">Email address</label>
-              <div class="input-with-icon">
-                <span class="input-icon">✉️</span>
-                <input type="email" id="regEmail" name="email" placeholder="you@example.com" autocomplete="email" required>
-              </div>
-            </div>
-
-            <div class="form-field">
-              <label for="regPassword">Password</label>
-              <div class="input-with-icon">
-                <span class="input-icon">🔑</span>
-                <input type="password" id="regPassword" name="password" placeholder="Create a password" autocomplete="new-password" required>
-              </div>
-              <span class="field-hint">Used for academic plain-text authentication as specified.</span>
-            </div>
-
-            <!-- Role selector as visual cards -->
-            <div class="form-field">
-              <label>Select your role</label>
-              <div class="radio-group">
-                <label class="radio-card selected" id="roleGenCard">
-                  <input type="radio" name="user_type" value="Generator" id="roleGen" checked>
-                  <span class="radio-icon">🏭</span>
-                  <span class="radio-title">Generator</span>
-                  <span class="radio-desc">I produce waste materials and want to post listings.</span>
-                </label>
-                <label class="radio-card" id="roleRecCard">
-                  <input type="radio" name="user_type" value="Recycler" id="roleRec">
-                  <span class="radio-icon">♻️</span>
-                  <span class="radio-title">Recycler</span>
-                  <span class="radio-desc">I collect and process recyclable materials.</span>
-                </label>
-              </div>
-            </div>
-
-            <button type="submit" class="btn btn-filled" style="width:100%;padding:12px;">
-              Create Account
-            </button>
-          </form>
-        </div>
-
-        <!-- Session Banner (if already logged in) -->
-        <div id="sessionBanner" style="display:none;margin-top:20px;"></div>
-      </div>
-
-    </div>
+      </div><!-- /form-panel -->
+    </div><!-- /auth-card -->
   </main>
 
-</div>
+  <div class="toast-stack" id="toastStack"></div>
 
-<div class="toast-stack" id="toastStack"></div>
-
-<script src="js/app.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    updateNavbar && updateNavbar();
-    initAuthPage();
-
-    // Radio card styling
-    document.querySelectorAll('.radio-card input[type="radio"]').forEach(radio => {
-      radio.addEventListener('change', () => {
-        document.querySelectorAll('.radio-card').forEach(c => c.classList.remove('selected'));
-        radio.closest('.radio-card').classList.add('selected');
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Radio card styling
+      document.querySelectorAll('.role-card input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+          document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+          radio.closest('.role-card').classList.add('selected');
+        });
       });
+
+      // Show session banner if already logged in
+      const existingUser = getCurrentUser();
+      if (existingUser) {
+        const banner = document.getElementById('sessionBanner');
+        const authForms = document.getElementById('authForms');
+        if (banner && authForms) {
+          authForms.style.display = 'none';
+          banner.style.display = 'block';
+          banner.innerHTML = `
+            <div class="session-banner">
+              <div class="session-banner-name">Signed in as <strong>${escapeHtml(existingUser.name)}</strong>
+              &nbsp;<span style="font-size:.8rem;font-weight:400;color:#6b7280">${existingUser.user_type} · ${existingUser.eco_points} pts</span></div>
+              <div class="session-banner-btns">
+                <a href="marketplace.html" class="sb-btn primary">Go to Marketplace</a>
+                <a href="dashboard.html" class="sb-btn">Dashboard</a>
+                <button onclick="logout()" class="sb-btn">Switch Account</button>
+              </div>
+            </div>`;
+        }
+      }
+
+      initAuthPage();
     });
-  });
 
-  function switchTab(tab) {
-    const isLogin = tab === 'login';
-    document.getElementById('tabLogin').classList.toggle('active', isLogin);
-    document.getElementById('tabRegister').classList.toggle('active', !isLogin);
-    document.getElementById('panelLogin').style.display = isLogin ? 'block' : 'none';
-    document.getElementById('panelRegister').style.display = isLogin ? 'none' : 'block';
-  }
+    function switchTab(tab) {
+      const isLogin = tab === 'login';
+      document.getElementById('tabLogin').classList.toggle('active', isLogin);
+      document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+      document.getElementById('panelLogin').style.display = isLogin ? 'block' : 'none';
+      document.getElementById('panelRegister').style.display = isLogin ? 'none' : 'block';
+    }
 
-  function fillDemo(email, pass) {
-    switchTab('login');
-    document.getElementById('loginEmail').value = email;
-    document.getElementById('loginPassword').value = pass;
-    showToast('Demo credentials loaded — click Sign In!', 'info');
-  }
-</script>
+    // Override initAuthPage form submit to show inline errors
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginForm = document.getElementById('formLogin');
+      const registerForm = document.getElementById('formRegister');
+
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = document.getElementById('loginEmail').value.trim();
+          const password = document.getElementById('loginPassword').value;
+          const btn = document.getElementById('loginBtn');
+          const errEl = document.getElementById('loginError');
+          errEl.classList.remove('show');
+          btn.disabled = true;
+          btn.textContent = 'Signing in…';
+          try {
+            const res = await API.login(email, password);
+            if (res.error) {
+              errEl.textContent = res.error;
+              errEl.classList.add('show');
+            } else {
+              setCurrentUser(res.user);
+              showToast('Welcome back, ' + res.user.name + '!', 'success');
+              setTimeout(() => { window.location.href = 'marketplace.html'; }, 600);
+            }
+          } catch (err) {
+            errEl.textContent = 'Connection error. Please try again.';
+            errEl.classList.add('show');
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Sign In';
+          }
+        });
+      }
+
+      if (registerForm) {
+        registerForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const name = document.getElementById('regName').value.trim();
+          const email = document.getElementById('regEmail').value.trim();
+          const password = document.getElementById('regPassword').value;
+          const radioChecked = document.querySelector('input[name="user_type"]:checked');
+          const user_type = radioChecked ? radioChecked.value : '';
+          const btn = document.getElementById('registerBtn');
+          const errEl = document.getElementById('registerError');
+          errEl.classList.remove('show');
+
+          if (!name || !email || !password) {
+            errEl.textContent = 'Please fill in all fields.';
+            errEl.classList.add('show');
+            return;
+          }
+          if (!user_type) {
+            errEl.textContent = 'Please select an account type.';
+            errEl.classList.add('show');
+            return;
+          }
+
+          btn.disabled = true;
+          btn.textContent = 'Creating account…';
+          try {
+            const res = await API.register(name, email, password, user_type);
+            if (res.error) {
+              errEl.textContent = res.error;
+              errEl.classList.add('show');
+            } else {
+              setCurrentUser(res.user);
+              showToast('Account created! Welcome, ' + res.user.name + '!', 'success');
+              setTimeout(() => { window.location.href = 'marketplace.html'; }, 600);
+            }
+          } catch (err) {
+            errEl.textContent = 'Connection error. Please try again.';
+            errEl.classList.add('show');
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Create Account';
+          }
+        });
+      }
+    });
+  </script>
 </body>
 </html>
