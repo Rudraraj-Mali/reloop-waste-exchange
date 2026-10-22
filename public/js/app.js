@@ -20,6 +20,54 @@ const CAT_ICONS = {
 function catIcon(name) { return CAT_ICONS[name] || '♻️'; }
 
 // ─────────────────────────────────────────────────────────────────
+// ECO RATING SYSTEM — based on CO₂ offset potential of a listing
+// ─────────────────────────────────────────────────────────────────
+
+/**
+ * Returns 1–5 star rating based on how much CO₂ the listing diverts.
+ * Tiers: <5 kg=1, 5-20=2, 20-50=3, 50-100=4, >100=5
+ */
+function getEcoStars(co2Saved) {
+  const v = parseFloat(co2Saved) || 0;
+  if (v >= 100) return 5;
+  if (v >= 50)  return 4;
+  if (v >= 20)  return 3;
+  if (v >= 5)   return 2;
+  return 1;
+}
+
+const ECO_LABELS = ['', 'Minimal', 'Low', 'Moderate', 'High', 'Excellent'];
+const ECO_COLORS = ['', '#9ca3af', '#d97706', '#2563eb', '#16a34a', '#15803d'];
+
+/**
+ * Renders a 5-star strip as coloured HTML spans.
+ * @param {number} stars  1–5
+ * @param {number} size   font-size in px (default 14)
+ */
+function renderStars(stars, size = 14) {
+  const color = ECO_COLORS[stars];
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    html += `<span style="color:${i <= stars ? color : '#d1d5db'};font-size:${size}px;line-height:1">★</span>`;
+  }
+  return html;
+}
+
+/**
+ * Full eco rating badge: stars + label + CO₂ range hint.
+ */
+function ecoRatingBadge(co2Saved) {
+  const stars = getEcoStars(co2Saved);
+  const label = ECO_LABELS[stars];
+  const color = ECO_COLORS[stars];
+  return `
+    <span style="display:inline-flex;align-items:center;gap:4px">
+      ${renderStars(stars, 13)}
+    </span>
+    <span style="font-size:.6875rem;font-weight:600;color:${color};margin-left:4px">${label}</span>`;
+}
+
+// ─────────────────────────────────────────────────────────────────
 // 2. LOCAL MOCK DATABASE (fallback when running as file://)
 // ─────────────────────────────────────────────────────────────────
 
@@ -526,13 +574,17 @@ function renderListings() {
   grid.innerHTML = filtered.map(l => {
     const isOwner    = user && l.generator_id === user.user_id;
     const isRecycler = user && user.user_type === 'Recycler';
+    const stars      = getEcoStars(l.potential_co2_saved);
+    const ratingLabel = ECO_LABELS[stars];
+    const ratingColor = ECO_COLORS[stars];
+
     let footer = '';
     if (isOwner) {
       footer = `<div class="own-badge">Your listing</div>`;
     } else if (isRecycler) {
       footer = `<button onclick="handleRequestExchange(${l.listing_id},'${escapeHtml(l.title).replace(/'/g,"\\'")}')" class="btn btn-primary">Request Exchange</button>`;
     } else {
-      footer = `<div class="own-badge">Switch to Recycler account to request</div>`;
+      footer = `<div class="own-badge">Switch to a Recycler account to request</div>`;
     }
 
     return `
@@ -543,22 +595,39 @@ function renderListings() {
             <span class="weight-tag">${l.weight_kg} kg</span>
           </div>
           <h3 class="listing-title">${escapeHtml(l.title)}</h3>
+
+          <!-- Eco Rating bar — full width, prominent -->
+          <div style="margin-bottom:12px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <span style="font-size:.6875rem;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#9ca3af">Eco Impact Rating</span>
+              <span style="font-size:.75rem;font-weight:700;color:${ratingColor}">${ratingLabel}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <div style="display:flex;gap:2px">${renderStars(stars, 15)}</div>
+              <span style="font-size:.75rem;color:#6b7280;margin-left:2px">${stars}/5 · ${l.potential_co2_saved} kg CO₂</span>
+            </div>
+            <!-- Progress bar -->
+            <div style="margin-top:5px;height:4px;border-radius:99px;background:#e5e7eb;overflow:hidden">
+              <div style="height:100%;width:${stars * 20}%;background:${ratingColor};border-radius:99px;transition:width .3s"></div>
+            </div>
+          </div>
+
           <div class="listing-stats">
             <div class="stat-item">
               <div class="stat-label">CO₂ Offset</div>
-              <div class="stat-val green">~${l.potential_co2_saved} kg</div>
+              <div class="stat-val" style="color:${ratingColor}">~${l.potential_co2_saved} kg</div>
             </div>
             <div class="stat-item">
               <div class="stat-label">Generator</div>
               <div class="stat-val">${escapeHtml(l.generator_name)}</div>
             </div>
             <div class="stat-item">
-              <div class="stat-label">Eco Rating</div>
-              <div class="stat-val">⭐ ${l.generator_eco_points}</div>
+              <div class="stat-label">CO₂ Rate</div>
+              <div class="stat-val">${l.co2_saved_per_kg} kg/kg</div>
             </div>
             <div class="stat-item">
-              <div class="stat-label">CO₂/kg</div>
-              <div class="stat-val">${l.co2_saved_per_kg}</div>
+              <div class="stat-label">Gen. Score</div>
+              <div class="stat-val">🌱 ${l.generator_eco_points} pts</div>
             </div>
           </div>
         </div>
@@ -667,7 +736,7 @@ async function loadDashboardMetrics(userId) {
           <div>
             <div class="stat-val">${impact.eco_points}</div>
             <div class="stat-label">Eco Points</div>
-            <div class="stat-note">+10 per SQL trigger</div>
+            <div class="stat-note">+10 per SQL trigger · awarded automatically</div>
           </div>
         </div>
         <div class="stat-card">
@@ -675,7 +744,7 @@ async function loadDashboardMetrics(userId) {
           <div>
             <div class="stat-val">${impact.total_weight_diverted} <span class="stat-unit">kg</span></div>
             <div class="stat-label">Weight Diverted</div>
-            <div class="stat-note">via SQL View</div>
+            <div class="stat-note">from SQL View: UserImpactDashboard</div>
           </div>
         </div>
         <div class="stat-card">
@@ -686,12 +755,22 @@ async function loadDashboardMetrics(userId) {
             <div class="stat-note">EPA emission factor</div>
           </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-icon purple">🔄</div>
-          <div>
-            <div class="stat-val">${impact.completed_exchanges}</div>
-            <div class="stat-label">Completed Exchanges</div>
-            <div class="stat-note">fulfilled transactions</div>
+        <div class="stat-card" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div class="stat-icon purple" style="flex-shrink:0">⭐</div>
+            <div>
+              <div class="stat-label">Eco Impact Rating</div>
+              <div class="stat-note">based on total CO₂ diverted</div>
+            </div>
+          </div>
+          <div style="width:100%">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <div style="display:flex;gap:3px">${renderStars(getEcoStars(impact.total_co2_saved), 16)}</div>
+              <span style="font-size:.8125rem;font-weight:700;color:${ECO_COLORS[getEcoStars(impact.total_co2_saved)]}">${ECO_LABELS[getEcoStars(impact.total_co2_saved)]}</span>
+            </div>
+            <div style="height:5px;border-radius:99px;background:#e5e7eb;overflow:hidden">
+              <div style="height:100%;width:${getEcoStars(impact.total_co2_saved)*20}%;background:${ECO_COLORS[getEcoStars(impact.total_co2_saved)]};border-radius:99px"></div>
+            </div>
           </div>
         </div>`;
     }
