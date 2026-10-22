@@ -9,6 +9,14 @@
 
 const isLocalFileMode = window.location.protocol === 'file:';
 
+// ── Clear stale demo data from older versions ──────────────────
+// Version stamp: bump this string whenever the mock DB schema changes.
+const MOCK_VERSION = 'v4-clean';
+if (localStorage.getItem('rl_mock_ver') !== MOCK_VERSION) {
+  localStorage.removeItem('rl_mock');
+  localStorage.setItem('rl_mock_ver', MOCK_VERSION);
+}
+
 const CAT_ICONS = {
   'Plastic (PET / HDPE)':      '🥤',
   'Paper & Cardboard':          '📦',
@@ -25,14 +33,19 @@ function catIcon(name) { return CAT_ICONS[name] || '♻️'; }
 
 /**
  * Returns 1–5 star rating based on how much CO₂ the listing diverts.
- * Tiers: <5 kg=1, 5-20=2, 20-50=3, 50-100=4, >100=5
+ * Tiers (lowered for easy demonstration):
+ *   ★☆☆☆☆ Minimal  → < 2 kg CO₂
+ *   ★★☆☆☆ Low      → 2–8 kg CO₂
+ *   ★★★☆☆ Moderate → 8–20 kg CO₂
+ *   ★★★★☆ High     → 20–50 kg CO₂
+ *   ★★★★★ Excellent → > 50 kg CO₂
  */
 function getEcoStars(co2Saved) {
   const v = parseFloat(co2Saved) || 0;
-  if (v >= 100) return 5;
-  if (v >= 50)  return 4;
-  if (v >= 20)  return 3;
-  if (v >= 5)   return 2;
+  if (v >= 50) return 5;
+  if (v >= 20) return 4;
+  if (v >= 8)  return 3;
+  if (v >= 2)  return 2;
   return 1;
 }
 
@@ -72,14 +85,11 @@ function ecoRatingBadge(co2Saved) {
 // ─────────────────────────────────────────────────────────────────
 
 function _initMock() {
+  // Always start with a clean empty database — no pre-seeded demo entries.
+  // Data is created by users registering and posting listings.
   if (localStorage.getItem('rl_mock')) return;
   const db = {
-    users: [
-      { user_id: 1, name: 'Alice Green', email: 'alice@generator.com', password: 'password123', user_type: 'Generator', eco_points: 20 },
-      { user_id: 2, name: 'Bob Clean', email: 'bob@recycler.com', password: 'password123', user_type: 'Recycler', eco_points: 0 },
-      { user_id: 3, name: 'Metro Supermarket', email: 'metro@generator.com', password: 'password123', user_type: 'Generator', eco_points: 10 },
-      { user_id: 4, name: 'EcoPlast Recycling', email: 'ecoplast@recycler.com', password: 'password123', user_type: 'Recycler', eco_points: 0 }
-    ],
+    users:     [],
     categories: [
       { category_id: 1, name: 'Plastic (PET / HDPE)',      co2_saved_per_kg: 1.50 },
       { category_id: 2, name: 'Paper & Cardboard',          co2_saved_per_kg: 1.10 },
@@ -88,17 +98,9 @@ function _initMock() {
       { category_id: 5, name: 'E-Waste (Electronics)',      co2_saved_per_kg: 3.20 },
       { category_id: 6, name: 'Organic Waste',              co2_saved_per_kg: 0.50 }
     ],
-    listings: [
-      { listing_id: 1, generator_id: 1, category_id: 2, title: 'Bundled Cardboard Boxes (Flat Pack)', weight_kg: 45.00, status: 'Available', created_at: new Date().toISOString() },
-      { listing_id: 2, generator_id: 1, category_id: 1, title: 'Clean HDPE Milk Jugs and PET Bottles', weight_kg: 20.00, status: 'Available', created_at: new Date().toISOString() },
-      { listing_id: 3, generator_id: 3, category_id: 3, title: 'Scrap Aluminum Cans & Food Tins', weight_kg: 35.50, status: 'Available', created_at: new Date().toISOString() },
-      { listing_id: 4, generator_id: 3, category_id: 6, title: 'Kitchen Vegetable & Fruit Scraps', weight_kg: 80.00, status: 'Completed', created_at: new Date().toISOString() }
-    ],
-    requests: [
-      { request_id: 1, listing_id: 4, recycler_id: 2, request_status: 'Completed', created_at: new Date().toISOString() },
-      { request_id: 2, listing_id: 1, recycler_id: 2, request_status: 'Pending',   created_at: new Date().toISOString() }
-    ],
-    _nextId: { user: 5, listing: 5, request: 3 }
+    listings:  [],
+    requests:  [],
+    _nextId:   { user: 1, listing: 1, request: 1 }
   };
   localStorage.setItem('rl_mock', JSON.stringify(db));
 }
