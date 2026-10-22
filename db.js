@@ -1,9 +1,14 @@
 require('dotenv').config();
 
-const CF_API_KEY = process.env.CLOUDFLARE_API_KEY;
-const CF_EMAIL = process.env.CLOUDFLARE_EMAIL;
-const CF_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
-const CF_DATABASE_ID = process.env.CLOUDFLARE_DATABASE_ID;
+const CF_API_KEY    = (process.env.CLOUDFLARE_API_KEY    || '').trim();
+const CF_ACCOUNT_ID = (process.env.CLOUDFLARE_ACCOUNT_ID || '').trim();
+const CF_DATABASE_ID= (process.env.CLOUDFLARE_DATABASE_ID|| '').trim();
+
+// Sanitize the email — in case the Vercel env var was pasted as "KEY: value"
+// (e.g. "CLOUDFLARE_EMAIL: foo@bar.com" instead of just "foo@bar.com")
+const _rawEmail = (process.env.CLOUDFLARE_EMAIL || '').replace(/[\r\n\t]/g, ' ').trim();
+const _emailMatch = _rawEmail.match(/([a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,})/);
+const CF_EMAIL = _emailMatch ? _emailMatch[1] : _rawEmail;
 
 const isCloudflare = Boolean(CF_API_KEY && CF_DATABASE_ID);
 
