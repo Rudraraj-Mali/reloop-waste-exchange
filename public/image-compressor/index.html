@@ -112,15 +112,14 @@ input[type=range]{accent-color:#2563eb}
     <p class="text-gray-500 text-base mb-8">Instantly reduce file size — JPEG, PNG, WebP. Free &amp; 100% in your browser.</p>
 
     <div id="drop-zone" class="rounded-xl p-10 cursor-pointer relative" role="button" tabindex="0">
-      <input type="file" id="file-input" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"/>
+      <input type="file" id="file-input" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"/>
       <div class="flex flex-col items-center gap-4 pointer-events-none">
         <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
           <path d="M26 34V14M26 14L18 22M26 14L34 22" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M10 38h32" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
         </svg>
         <p class="text-gray-600 text-base">Drop your images here or <span class="text-blue-600 font-semibold underline">browse</span>.</p>
-        <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg text-sm transition pointer-events-auto"
-                onclick="document.getElementById('file-input').click()">Select Image</button>
+        <span class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg text-sm transition inline-block">Select Image</span>
       </div>
     </div>
     <p class="text-xs text-gray-400 mt-3">Supports JPEG · PNG · WebP · GIF · BMP · AVIF &nbsp;·&nbsp; Multiple files OK</p>
@@ -762,10 +761,6 @@ dlZipBtn.addEventListener('click', async () => {
   const content = await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:1}});
   dlBlob(content,'compressed-images.zip');
   dlZipBtn.innerHTML='<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg> Download All (.ZIP)';
-  dlZipBtn.disabled=false;
-  const hasDone = S.queue.some(i=>i.status==='done');
-  if(hasDone){dlZipBtn.classList.remove('opacity-40','cursor-not-allowed');}
-});
   dlZipBtn.disabled=false;
   const hasDone = S.queue.some(i=>i.status==='done');
   if(hasDone){dlZipBtn.classList.remove('opacity-40','cursor-not-allowed');}
