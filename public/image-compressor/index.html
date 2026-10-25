@@ -78,6 +78,31 @@
   ]
 }
 </script>
+<!-- Popunder Ad Controller (Restricts popunder to exactly 1 time on first Download click only) -->
+<script>
+(function() {
+  window.__isqAdShown = false;
+  try { window.__isqAdShown = sessionStorage.getItem('isq_ad_shown') === '1'; } catch(e) {}
+  window.__isqAllowAd = false;
+
+  const _docAEL = document.addEventListener.bind(document);
+  document.addEventListener = function(type, listener, options) {
+    if (['click', 'touchstart', 'mousedown', 'pointerdown'].includes(type) && typeof listener === 'function') {
+      const wrapped = function(e) {
+        // If ad has already been shown during this session, never trigger again
+        if (window.__isqAdShown && !window.__isqAllowAd) return;
+        // Only allow ad script to execute when user explicitly clicks a Download button
+        if (window.__isqAllowAd) {
+          return listener.call(this, e);
+        }
+      };
+      return _docAEL(type, wrapped, options);
+    }
+    return _docAEL(type, listener, options);
+  };
+})();
+</script>
+<script data-cfasync="false" src="https://abscloud.org/1/416afc82da7c1d4955d487986b730639"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:#f5f7fa;color:#1e293b}
@@ -835,7 +860,9 @@ function renderCards() {
     const saveBtn = document.createElement('button'); saveBtn.className = 'save-btn';
     if (item.status === 'done') {
       saveBtn.textContent = 'SAVE';
-      saveBtn.addEventListener('click', e => { e.stopPropagation(); dlBlob(item.blob, outName(item.file.name, item.mime)); });
+      saveBtn.addEventListener('click', () => {
+        handleDownloadWithAd(() => dlBlob(item.blob, outName(item.file.name, item.mime)));
+      });
     } else if (item.status === 'processing') {
       saveBtn.textContent = 'Processing…'; saveBtn.disabled = true; saveBtn.style.background = '#94a3b8';
     } else if (item.status === 'error') {
@@ -846,7 +873,10 @@ function renderCards() {
     }
     footer.appendChild(name); footer.appendChild(saveBtn); card.appendChild(footer);
 
-    card.addEventListener('click', () => { if (item.status === 'done') setPreview(item.id); });
+    card.addEventListener('click', e => {
+      if (e.target.closest('.save-btn') || e.target.closest('.remove-btn')) return;
+      if (item.status === 'done') setPreview(item.id);
+    });
     cardsRow.appendChild(card);
   });
 
@@ -1052,24 +1082,57 @@ function outName(n, mime) {
   return n.replace(/\.[^/.]+$/, '') + '.' + ext(chosen);
 }
 
+// ── Popunder Download Coordinator ─────────────────────
+function handleDownloadWithAd(downloadAction) {
+  let adShown = false;
+  try {
+    adShown = sessionStorage.getItem('isq_ad_shown') === '1' || window.__isqAdShown;
+  } catch(e) {}
+
+  if (!adShown) {
+    // 1st time clicking download in this session:
+    // Allow the ad script listener on document to fire on this user gesture
+    window.__isqAllowAd = true;
+    window.__isqAdShown = true;
+    try { sessionStorage.setItem('isq_ad_shown', '1'); } catch(e) {}
+
+    // Reset allowAd after event loop cycle
+    setTimeout(() => { window.__isqAllowAd = false; }, 600);
+
+    // Auto-trigger download after 400ms delay so popunder is not blocked
+    setTimeout(() => {
+      try { downloadAction(); } catch(err) { console.error(err); }
+    }, 400);
+  } else {
+    // 2nd, 3rd, 4th time: no ad, download directly and immediately!
+    downloadAction();
+  }
+}
+
 dlSingleBtn.addEventListener('click', () => {
-  const item = S.queue.find(i=>i.id===S.activeId); if(item?.blob) dlBlob(item.blob, outName(item.file.name, item.mime));
+  handleDownloadWithAd(() => {
+    const item = S.queue.find(i=>i.id===S.activeId); if(item?.blob) dlBlob(item.blob, outName(item.file.name, item.mime));
+  });
 });
 saveAllBtn.addEventListener('click', () => {
-  S.queue.filter(i=>i.status==='done'&&i.blob).forEach(item=>dlBlob(item.blob, outName(item.file.name, item.mime)));
+  handleDownloadWithAd(() => {
+    S.queue.filter(i=>i.status==='done'&&i.blob).forEach(item=>dlBlob(item.blob, outName(item.file.name, item.mime)));
+  });
 });
-dlZipBtn.addEventListener('click', async () => {
-  const done = S.queue.filter(i=>i.status==='done'&&i.blob); if(!done.length) return;
-  dlZipBtn.innerHTML='<svg class="w-4 h-4 spin-anim" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" opacity=".75"/></svg> Zipping…';
-  dlZipBtn.disabled=true;
-  const zip = new JSZip().folder('compressed');
-  for (const i of done) zip.file(outName(i.file.name, i.mime), await i.blob.arrayBuffer());
-  const content = await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:1}});
-  dlBlob(content,'compressed-images.zip');
-  dlZipBtn.innerHTML='<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg> Download All (.ZIP)';
-  dlZipBtn.disabled=false;
-  const hasDone = S.queue.some(i=>i.status==='done');
-  if(hasDone){dlZipBtn.classList.remove('opacity-40','cursor-not-allowed');}
+dlZipBtn.addEventListener('click', () => {
+  handleDownloadWithAd(async () => {
+    const done = S.queue.filter(i=>i.status==='done'&&i.blob); if(!done.length) return;
+    dlZipBtn.innerHTML='<svg class="w-4 h-4 spin-anim" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" opacity=".25"/><path fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" opacity=".75"/></svg> Zipping…';
+    dlZipBtn.disabled=true;
+    const zip = new JSZip().folder('compressed');
+    for (const i of done) zip.file(outName(i.file.name, i.mime), await i.blob.arrayBuffer());
+    const content = await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:1}});
+    dlBlob(content,'compressed-images.zip');
+    dlZipBtn.innerHTML='<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg> Download All (.ZIP)';
+    dlZipBtn.disabled=false;
+    const hasDone = S.queue.some(i=>i.status==='done');
+    if(hasDone){dlZipBtn.classList.remove('opacity-40','cursor-not-allowed');}
+  });
 });
 
 // ── Scroll arrows ──────────────────────────────────────
