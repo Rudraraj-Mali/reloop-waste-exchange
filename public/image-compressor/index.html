@@ -170,14 +170,15 @@ input[type=range]{accent-color:#2563eb}
     <p class="text-gray-500 text-base mb-8">Instantly reduce file size — JPEG, PNG, WebP. Free &amp; 100% in your browser.</p>
 
     <div id="drop-zone" class="rounded-xl p-10 cursor-pointer relative" role="button" tabindex="0">
-      <input type="file" id="file-input" accept="image/*" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"/>
-      <div class="flex flex-col items-center gap-4 pointer-events-none">
-        <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+      <input type="file" id="file-input" accept="image/*,.png,.jpg,.jpeg,.webp,.gif,.bmp,.avif" multiple class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"/>
+      <div class="flex flex-col items-center gap-3 pointer-events-none">
+        <svg width="48" height="48" viewBox="0 0 52 52" fill="none">
           <path d="M26 34V14M26 14L18 22M26 14L34 22" stroke="#2563eb" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M10 38h32" stroke="#2563eb" stroke-width="3" stroke-linecap="round"/>
         </svg>
         <p class="text-gray-600 text-base">Drop your images here or <span class="text-blue-600 font-semibold underline">browse</span>.</p>
-        <span class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg text-sm transition inline-block">Select Image</span>
+        <span class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-2.5 rounded-lg text-sm transition inline-block shadow-sm">Select Image</span>
+        <span class="text-xs text-gray-400">or paste from clipboard (<kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[11px] font-mono text-gray-600">Ctrl</kbd>+<kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-300 rounded text-[11px] font-mono text-gray-600">V</kbd>)</span>
       </div>
     </div>
     <p class="text-xs text-gray-400 mt-3">Supports JPEG · PNG · WebP · GIF · BMP · AVIF &nbsp;·&nbsp; Multiple files OK</p>
@@ -1075,12 +1076,53 @@ dlZipBtn.addEventListener('click', async () => {
 scrollLeft.addEventListener('click',  () => cardsRow.scrollBy({left:-200,behavior:'smooth'}));
 scrollRight.addEventListener('click', () => cardsRow.scrollBy({left:200,behavior:'smooth'}));
 
-// ── Drop zone ──────────────────────────────────────────
-dropZone.addEventListener('dragover', e=>{ e.preventDefault(); dropZone.classList.add('drag-active'); });
-dropZone.addEventListener('dragleave',  ()=>dropZone.classList.remove('drag-active'));
-dropZone.addEventListener('drop', e=>{ e.preventDefault(); dropZone.classList.remove('drag-active'); addFiles(e.dataTransfer.files); });
-fileInput.addEventListener('change', ()=>{ if(fileInput.files.length) addFiles(fileInput.files); fileInput.value=''; });
-dropZone.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') fileInput.click(); });
+// ── Drop zone, Window Drag & Clipboard Paste ──────────
+['dragenter', 'dragover'].forEach(evt => {
+  window.addEventListener(evt, e => {
+    e.preventDefault();
+    dropZone.classList.add('drag-active');
+  });
+});
+['dragleave', 'dragend'].forEach(evt => {
+  window.addEventListener(evt, e => {
+    if (!e.relatedTarget) dropZone.classList.remove('drag-active');
+  });
+});
+window.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-active');
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+    addFiles(e.dataTransfer.files);
+  }
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) addFiles(fileInput.files);
+  fileInput.value = '';
+});
+dropZone.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') fileInput.click();
+});
+
+// Clipboard paste (Ctrl+V) support
+window.addEventListener('paste', e => {
+  const clip = e.clipboardData;
+  if (!clip) return;
+  const items = clip.items || clip.files;
+  if (!items) return;
+  const pastedFiles = [];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    if (item.type && item.type.startsWith('image/')) {
+      const file = typeof item.getAsFile === 'function' ? item.getAsFile() : item;
+      if (file) pastedFiles.push(file);
+    }
+  }
+  if (pastedFiles.length) {
+    addFiles(pastedFiles);
+    showNotice(`📋 Pasted ${pastedFiles.length} image(s) from clipboard!`);
+  }
+});
 
 // ── Modals ─────────────────────────────────────────────
 function openModal(id)  { $(id).classList.add('show');    document.body.style.overflow='hidden'; }
