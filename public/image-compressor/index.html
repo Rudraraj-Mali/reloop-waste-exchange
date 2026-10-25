@@ -3,13 +3,81 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<meta name="description" content="Free online image compressor. Compress JPEG, PNG, WebP up to 90% smaller — 100% in your browser, no uploads, fully private."/>
-<meta name="keywords" content="image compressor,compress image online,webp converter,jpeg compressor,png compressor"/>
+<meta name="description" content="Compress JPEG, PNG, WebP &amp; AVIF images online with our smart image optimizer. Reduce file sizes up to 90% without losing quality. 100% private, client-side batch compression."/>
+<meta name="keywords" content="image compressor, compress image online, optimizilla, image optimizer, batch image compressor, webp compressor, png shrinker, jpeg optimizer, lossy compression"/>
 <meta name="robots" content="index,follow"/>
-<title>ImageSqueeze — Free Image Compressor &amp; Converter</title>
+<title>ImageSqueeze — Smart Online Image Optimizer (Optimizilla Alternative)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"Is ImageSqueeze free?","acceptedAnswer":{"@type":"Answer","text":"Yes, 100% free, no account needed."}},{"@type":"Question","name":"Are images uploaded?","acceptedAnswer":{"@type":"Answer","text":"No. All processing is local in your browser."}}]}</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "name": "ImageSqueeze",
+      "url": "https://imagesqueeze.app",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5 Canvas.",
+      "description": "Smart online image optimizer to compress JPEG, PNG, and WebP images to the minimum possible size with visual quality preservation."
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does ImageSqueeze compress images without losing quality?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ImageSqueeze uses smart perceptual lossy and lossless optimization algorithms. It analyzes pixel distribution, frequency data, and removes imperceptible color variations and metadata to achieve up to 90% size reduction with crystal-clear visual quality."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Do my private images get uploaded to any external server?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No, absolutely not. All compression executes 100% locally in your browser memory via the HTML5 Canvas API. Your files never leave your device."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I use the interactive before/after comparator?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Click any image thumbnail in the queue to load it into the comparator. Drag the divider handle to inspect the original versus compressed image, and use the vertical Quality slider or number box to fine-tune the compression level in real time."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Which format should I choose: Auto, JPG, PNG, or WebP?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Auto (JPG/PNG) automatically compares file sizes and chooses the lighter format while preserving transparency for PNGs. You can also manually choose JPG, PNG, or WebP."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can I compress multiple images simultaneously and download them in a ZIP?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. You can upload multiple images simultaneously. Each file is processed in parallel, and you can download them all bundled into a single ZIP archive."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Will compressing my image alter its pixel dimensions (width & height)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. The optimizer retains your original pixel resolution while significantly reducing the file byte size."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:#f5f7fa;color:#1e293b}
@@ -78,16 +146,6 @@ input[type=range]{accent-color:#2563eb}
 </style>
 </head>
 <body class="min-h-screen">
-
-<!-- TOP AD -->
-<div class="w-full bg-white border-b border-gray-100">
-  <div class="max-w-4xl mx-auto px-4 py-2 flex justify-center">
-    <div class="w-full max-w-[728px] bg-gray-50 border border-dashed border-gray-200 rounded text-center text-gray-400 text-xs" style="min-height:60px;display:flex;align-items:center;justify-content:center">
-      <!-- AdSense: 728×90 leaderboard -->
-      Advertisement
-    </div>
-  </div>
-</div>
 
 <!-- HEADER -->
 <header class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
@@ -236,76 +294,271 @@ input[type=range]{accent-color:#2563eb}
 
 </section>
 
-<!-- IN-FEED AD -->
-<div class="max-w-4xl mx-auto px-4 py-3">
-  <div class="bg-gray-50 border border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 text-xs" style="min-height:72px">
-    Advertisement · In-Feed
-  </div>
-</div>
+<!-- SEO & EDITORIAL CONTENT (Modeled after imagecompressor.com / Optimizilla) -->
+<main class="max-w-4xl mx-auto px-4 py-14 space-y-16">
 
-<!-- SEO CONTENT -->
-<main class="max-w-4xl mx-auto px-4 py-10 space-y-14">
+  <!-- HERO EDITORIAL OVERVIEW -->
+  <section class="bg-white rounded-2xl border border-gray-200 p-8 sm:p-10 shadow-sm">
+    <div class="max-w-3xl">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold mb-4">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Next-Gen Perceptual Optimization
+      </div>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-4">
+        Smart Online Image Optimizer — Shrink JPEG, PNG &amp; WebP Without Quality Loss
+      </h2>
+      <p class="text-gray-600 text-sm sm:text-base leading-relaxed mb-6">
+        ImageSqueeze uses an intelligent combination of the best optimization and lossy compression algorithms to shrink <strong>JPEG</strong>, <strong>PNG</strong>, <strong>WebP</strong>, <strong>GIF</strong>, and <strong>AVIF</strong> files to the absolute minimum file size while meticulously maintaining the required level of perceptual quality. By selectively reducing redundant high-frequency image data, color quantization levels, and unnecessary metadata headers, it delivers up to <strong>80–90% compression</strong> with virtually indistinguishable visual variance.
+      </p>
+      
+      <div class="grid sm:grid-cols-3 gap-4 pt-4 border-t border-gray-100">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
+            ✓
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider mb-0.5">Automated Tuning</h4>
+            <p class="text-xs text-gray-500 leading-normal">Smart auto-detection selects the most efficient compression bitrate per file.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
+            ✓
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider mb-0.5">Live Comparator</h4>
+            <p class="text-xs text-gray-500 leading-normal">Inspect original vs. compressed pixels with our real-time interactive slider.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm flex-shrink-0">
+            ✓
+          </div>
+          <div>
+            <h4 class="text-xs font-bold text-gray-900 uppercase tracking-wider mb-0.5">Batch ZIP Export</h4>
+            <p class="text-xs text-gray-500 leading-normal">Process dozens of files concurrently and bundle them into a single ZIP archive.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-  <section>
-    <h2 class="text-2xl font-black text-gray-900 mb-6 text-center">How ImageSqueeze Works</h2>
+  <!-- STEP BY STEP WORKFLOW GUIDE -->
+  <section id="guide" class="space-y-6">
+    <div class="text-center max-w-2xl mx-auto">
+      <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">How to Compress Images Online</h2>
+      <p class="text-gray-500 text-sm mt-1">Four quick steps to optimize your pictures for web performance, email attachments, and apps.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-xs relative flex flex-col justify-between">
+        <div>
+          <div class="w-9 h-9 rounded-lg bg-blue-600 text-white font-black text-sm flex items-center justify-center mb-3">
+            01
+          </div>
+          <h3 class="font-bold text-gray-900 text-base mb-1.5">Upload Images</h3>
+          <p class="text-gray-500 text-xs leading-relaxed">
+            Drag and drop up to multiple image files into the upload box or click <strong class="text-gray-700">Select Image</strong>. Supports JPEG, PNG, WebP, GIF, BMP, and AVIF formats.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-gray-100 text-[11px] text-blue-600 font-medium">
+          Supports multiple files
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-xs relative flex flex-col justify-between">
+        <div>
+          <div class="w-9 h-9 rounded-lg bg-blue-600 text-white font-black text-sm flex items-center justify-center mb-3">
+            02
+          </div>
+          <h3 class="font-bold text-gray-900 text-base mb-1.5">Automatic Optimizer</h3>
+          <p class="text-gray-500 text-xs leading-relaxed">
+            Our intelligent engine automatically evaluates the color space, alpha channels, and bit depth of each image to calculate optimal compression parameters without manual hassle.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-gray-100 text-[11px] text-blue-600 font-medium">
+          Zero delay processing
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-xs relative flex flex-col justify-between">
+        <div>
+          <div class="w-9 h-9 rounded-lg bg-blue-600 text-white font-black text-sm flex items-center justify-center mb-3">
+            03
+          </div>
+          <h3 class="font-bold text-gray-900 text-base mb-1.5">Visual Tuning</h3>
+          <p class="text-gray-500 text-xs leading-relaxed">
+            Click any thumbnail in the queue to preview it in the interactive split slider. Use the right vertical quality bar or enter an exact number to dial in your target file size.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-gray-100 text-[11px] text-blue-600 font-medium">
+          Real-time split slider
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-5 shadow-xs relative flex flex-col justify-between">
+        <div>
+          <div class="w-9 h-9 rounded-lg bg-blue-600 text-white font-black text-sm flex items-center justify-center mb-3">
+            04
+          </div>
+          <h3 class="font-bold text-gray-900 text-base mb-1.5">Download &amp; Save</h3>
+          <p class="text-gray-500 text-xs leading-relaxed">
+            Download individual compressed files or click <strong class="text-gray-700">Download All (.ZIP)</strong> to instantly save your entire batch packaged neatly together.
+          </p>
+        </div>
+        <div class="mt-4 pt-3 border-t border-gray-100 text-[11px] text-blue-600 font-medium">
+          Instant ZIP export
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPARISON TABLE SECTION -->
+  <section class="space-y-6">
+    <div class="max-w-2xl">
+      <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Lossy vs. Lossless Image Formats: Detailed Matrix</h2>
+      <p class="text-gray-500 text-sm mt-1">Understanding the trade-offs between image formats and their underlying compression algorithms.</p>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-xs">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr class="bg-gray-50/80 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider text-[11px]">
+              <th class="py-3.5 px-4">Format</th>
+              <th class="py-3.5 px-4">Compression Type</th>
+              <th class="py-3.5 px-4">Alpha Transparency</th>
+              <th class="py-3.5 px-4">Average Size Reduction</th>
+              <th class="py-3.5 px-4">Best Use Cases</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 text-gray-700">
+            <tr class="hover:bg-gray-50/50 transition">
+              <td class="py-3.5 px-4 font-bold text-gray-900 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> JPEG / JPG
+              </td>
+              <td class="py-3.5 px-4">Lossy (Discrete Cosine Transform)</td>
+              <td class="py-3.5 px-4 text-gray-400">No</td>
+              <td class="py-3.5 px-4 font-semibold text-green-600">65% – 85%</td>
+              <td class="py-3.5 px-4 text-gray-600">Complex photography, ecommerce product catalogs, full-width blog banners.</td>
+            </tr>
+            <tr class="hover:bg-gray-50/50 transition">
+              <td class="py-3.5 px-4 font-bold text-gray-900 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> PNG
+              </td>
+              <td class="py-3.5 px-4">Lossless (DEFLATE / LZ77)</td>
+              <td class="py-3.5 px-4 font-semibold text-emerald-600">Yes (Full 8/24-bit)</td>
+              <td class="py-3.5 px-4 font-semibold text-green-600">20% – 45%</td>
+              <td class="py-3.5 px-4 text-gray-600">Company logos, icons, vector illustrations, UI assets requiring transparent backgrounds.</td>
+            </tr>
+            <tr class="hover:bg-gray-50/50 transition bg-blue-50/20">
+              <td class="py-3.5 px-4 font-bold text-gray-900 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span> WebP
+                <span class="bg-indigo-100 text-indigo-700 text-[10px] px-1.5 py-0.5 rounded font-bold">Recommended</span>
+              </td>
+              <td class="py-3.5 px-4">Lossy &amp; Lossless (VP8 / Predictive)</td>
+              <td class="py-3.5 px-4 font-semibold text-emerald-600">Yes</td>
+              <td class="py-3.5 px-4 font-bold text-green-600">75% – 90%</td>
+              <td class="py-3.5 px-4 text-gray-600">Modern responsive web design, mobile-first pages, Core Web Vitals optimization.</td>
+            </tr>
+            <tr class="hover:bg-gray-50/50 transition">
+              <td class="py-3.5 px-4 font-bold text-gray-900 flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-violet-500"></span> AVIF
+              </td>
+              <td class="py-3.5 px-4">Ultra Lossy / Lossless (AV1 Intra)</td>
+              <td class="py-3.5 px-4 font-semibold text-emerald-600">Yes (HDR Support)</td>
+              <td class="py-3.5 px-4 font-bold text-green-600">80% – 95%</td>
+              <td class="py-3.5 px-4 text-gray-600">Cutting-edge media sites, high dynamic range images, maximum bandwidth savings.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- CORE WEB VITALS & SEO IMPACT -->
+  <section class="space-y-6">
+    <div class="max-w-2xl">
+      <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Why Image Optimization Directly Impacts Google Rankings</h2>
+      <p class="text-gray-500 text-sm mt-1">Image compression is one of the single most influential technical SEO levers for page ranking.</p>
+    </div>
+
     <div class="grid md:grid-cols-3 gap-5">
-      <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm text-center">
-        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg mx-auto mb-3">1</div>
-        <h3 class="font-bold text-gray-900 mb-2">Upload Images</h3>
-        <p class="text-gray-500 text-sm">Drop or browse any JPEG, PNG, WebP, GIF, BMP or AVIF file. Multiple files supported.</p>
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-3">
+        <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3 class="font-bold text-gray-900 text-base">Largest Contentful Paint (LCP)</h3>
+        <p class="text-gray-500 text-xs leading-relaxed">
+          Google’s Core Web Vitals evaluate LCP as a vital ranking metric. On more than 70% of websites, the largest element rendered on screen is a hero banner or featured image. Compressing a 4 MB image down to 250 KB ensures your page achieves the &lt; 2.5s "Good" threshold.
+        </p>
       </div>
-      <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm text-center">
-        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg mx-auto mb-3">2</div>
-        <h3 class="font-bold text-gray-900 mb-2">Adjust Quality</h3>
-        <p class="text-gray-500 text-sm">Set quality %, choose format, or set a max KB limit. Our algorithm finds the optimal balance automatically.</p>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-3">
+        <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+        </div>
+        <h3 class="font-bold text-gray-900 text-base">Conversion &amp; Bounce Rates</h3>
+        <p class="text-gray-500 text-xs leading-relaxed">
+          Industry benchmarks from Google and Deloitte reveal that every 100-millisecond reduction in mobile page load speed lifts retail sales conversions by up to 8.4%. Slow, uncompressed graphics are the primary culprit behind abandoned shopping carts and high bounce rates.
+        </p>
       </div>
-      <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm text-center">
-        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-black text-lg mx-auto mb-3">3</div>
-        <h3 class="font-bold text-gray-900 mb-2">Download</h3>
-        <p class="text-gray-500 text-sm">Save individual images or download everything as a ZIP. Instant results — no waiting, no email required.</p>
+
+      <div class="bg-white rounded-xl border border-gray-200 p-6 shadow-xs space-y-3">
+        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
+        </div>
+        <h3 class="font-bold text-gray-900 text-base">Bandwidth &amp; CDN Savings</h3>
+        <p class="text-gray-500 text-xs leading-relaxed">
+          Serving lightweight, properly optimized visual assets reduces monthly egress bandwidth fees across AWS CloudFront, Cloudflare, Fastly, or Vercel. For high-traffic platforms, a 70% reduction in image payload translates directly into lower hosting expenses.
+        </p>
       </div>
     </div>
   </section>
 
-  <section>
-    <h2 class="text-2xl font-black text-gray-900 mb-5">Lossy vs. Lossless Compression</h2>
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="bg-orange-50 border border-orange-100 rounded-xl p-6">
-        <h3 class="text-orange-600 font-bold text-lg mb-2">⚡ Lossy (JPEG, WebP)</h3>
-        <p class="text-gray-600 text-sm mb-3">Removes data the eye won't notice. Achieves 60–90% reduction. Best for photos and web images.</p>
-        <ul class="text-sm text-gray-600 space-y-1"><li>✓ Huge savings</li><li>✓ Visually great at 80%+</li><li>✗ Minor quality trade-off</li></ul>
+  <!-- ZERO-SERVER PRIVACY GUARANTEE -->
+  <section class="bg-white rounded-2xl border border-gray-200 p-8 sm:p-10 shadow-xs relative overflow-hidden">
+    <div class="relative z-10 space-y-4">
+      <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 text-xs font-semibold">
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+        100% Client-Side Privacy Architecture
       </div>
-      <div class="bg-green-50 border border-green-100 rounded-xl p-6">
-        <h3 class="text-green-600 font-bold text-lg mb-2">🔒 Lossless (PNG)</h3>
-        <p class="text-gray-600 text-sm mb-3">Preserves every pixel. 10–30% savings. Best for logos, UI, transparent images.</p>
-        <ul class="text-sm text-gray-600 space-y-1"><li>✓ Zero quality loss</li><li>✓ Perfect for text & edges</li><li>✗ Larger files for photos</li></ul>
+      <h2 class="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
+        Zero Cloud Uploads: Your Images Never Leave Your Machine
+      </h2>
+      <p class="text-gray-600 text-sm leading-relaxed max-w-3xl">
+        Traditional online compression utilities upload your files to remote cloud servers for batch script processing, creating data privacy hazards and potential leaks. ImageSqueeze executes entirely inside your web browser’s JavaScript engine using the high-performance HTML5 Canvas API and Web Workers.
+      </p>
+      
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4">
+        <div class="p-3.5 rounded-lg bg-gray-50 border border-gray-100">
+          <div class="font-bold text-gray-900 text-xs mb-1">Local Browser Execution</div>
+          <div class="text-[11px] text-gray-500 leading-normal">Canvas.toBlob() processes pixels directly in device RAM.</div>
+        </div>
+        <div class="p-3.5 rounded-lg bg-gray-50 border border-gray-100">
+          <div class="font-bold text-gray-900 text-xs mb-1">Full Offline Capability</div>
+          <div class="text-[11px] text-gray-500 leading-normal">Disconnect your internet connection and compress files anytime.</div>
+        </div>
+        <div class="p-3.5 rounded-lg bg-gray-50 border border-gray-100">
+          <div class="font-bold text-gray-900 text-xs mb-1">Zero File Storage or Logs</div>
+          <div class="text-[11px] text-gray-500 leading-normal">No database, no third-party tracking, no lingering temp files.</div>
+        </div>
+        <div class="p-3.5 rounded-lg bg-gray-50 border border-gray-100">
+          <div class="font-bold text-gray-900 text-xs mb-1">Confidential &amp; Secure</div>
+          <div class="text-[11px] text-gray-500 leading-normal">Guaranteed safe for proprietary designs, contracts, and medical scans.</div>
+        </div>
       </div>
     </div>
   </section>
 
-  <section class="bg-blue-50 border border-blue-100 rounded-2xl p-8">
-    <h2 class="text-xl font-black text-gray-900 mb-2">100% Private — Your Images Never Leave Your Device</h2>
-    <p class="text-gray-600 text-sm leading-relaxed mb-4">ImageSqueeze uses the <strong>HTML5 Canvas API</strong> to compress images entirely in your browser. No server. No cloud. Works offline after the page loads. Safe for private, medical, or sensitive images.</p>
-    <div class="grid sm:grid-cols-2 gap-3 text-sm">
-      <div class="flex gap-2"><span class="text-green-600 font-bold">✓</span><span class="text-gray-600">All processing via <code class="bg-white px-1 rounded">canvas.toBlob()</code></span></div>
-      <div class="flex gap-2"><span class="text-green-600 font-bold">✓</span><span class="text-gray-600">Works fully offline</span></div>
-      <div class="flex gap-2"><span class="text-green-600 font-bold">✓</span><span class="text-gray-600">No logs, no analytics on images</span></div>
-      <div class="flex gap-2"><span class="text-green-600 font-bold">✓</span><span class="text-gray-600">Safe for confidential content</span></div>
+  <!-- FAQ SECTION -->
+  <section id="faq" class="space-y-6">
+    <div class="max-w-2xl">
+      <h2 class="text-2xl font-extrabold text-gray-900 tracking-tight">Frequently Asked Questions</h2>
+      <p class="text-gray-500 text-sm mt-1">Everything you need to know about modern image compression, quality preservation, and formats.</p>
     </div>
-  </section>
 
-  <section>
-    <h2 class="text-2xl font-black text-gray-900 mb-4">Why Compress Images?</h2>
-    <div class="text-gray-600 text-sm leading-relaxed space-y-3">
-      <p>Images account for over <strong class="text-gray-800">50% of the average webpage's total bytes</strong>. Unoptimized images are the #1 cause of slow page loads and poor Core Web Vitals — which directly affect Google rankings.</p>
-      <p>A 5 MB hero image can add 5–8 seconds of load time on mobile. Compressed to 300 KB it loads in under a second. Studies show a <strong class="text-gray-800">1-second delay reduces conversions by 7%</strong>. Smaller images also lower CDN costs and help users on slow connections.</p>
-    </div>
-  </section>
-
-  <section id="faq">
-    <h2 class="text-2xl font-black text-gray-900 mb-2">Frequently Asked Questions</h2>
-    <p class="text-gray-500 text-sm mb-6">Everything about image compression answered.</p>
-    <div id="faq-list" class="space-y-2 max-w-3xl"></div>
+    <div id="faq-list" class="space-y-3"></div>
   </section>
 
 </main>
@@ -786,19 +1039,41 @@ function handleContact(e) { e.preventDefault(); $('contact-ok').classList.remove
 
 // ── FAQ ────────────────────────────────────────────────
 [
-  {q:'Is ImageSqueeze completely free?', a:'Yes. 100% free, no account, no limits. We sustain the service through non-intrusive ads.'},
-  {q:"Do my images get uploaded to a server?", a:"No. Every operation runs locally in your browser using the HTML5 Canvas API. You can disconnect from the internet after the page loads and still compress images."},
-  {q:'What formats can I upload?',       a:'Upload: JPEG, PNG, WebP, GIF, BMP, AVIF. Export as WebP (recommended), JPEG, or PNG.'},
-  {q:'What quality setting should I use?', a:'For photos, 75–85% is the sweet spot — huge size savings with minimal visual difference. For logos or sharp graphics, 85–95%.'},
-  {q:'Why is WebP smaller than JPEG?',   a:'WebP uses a more advanced VP8-based compression algorithm. It is typically 25–35% smaller than JPEG at equivalent quality.'},
-  {q:'Can I compress multiple images?',  a:'Yes! Drop multiple images at once. Every image gets its own card. Download individually or grab all as a ZIP.'},
-  {q:'What does Max KB do?',             a:'It runs a binary-search algorithm to find the highest quality that still produces a file under your KB limit. Perfect for email or CMS size limits.'},
-  {q:'Will compression change dimensions?', a:'No. Original dimensions are preserved. Only file size changes.'},
-  {q:'Is PNG output lossless?',          a:'Yes. PNG is always lossless — the quality slider has no effect on PNG. Convert to WebP for smaller lossless files.'},
-  {q:'Is it safe for private images?',   a:'Absolutely. All processing is local. Medical, legal, or private images never leave your device.'},
+  {
+    q: 'How does ImageSqueeze compress images without losing quality?',
+    a: 'ImageSqueeze utilizes intelligent perceptual lossy and lossless algorithms. It analyzes the visual complexity of your image and removes imperceptible color variations, high-frequency noise, and unnecessary metadata headers (such as camera EXIF data) that the human eye cannot discern. This delivers up to 80–90% reduction in file size while retaining crystal-clear edges and rich color fidelity.'
+  },
+  {
+    q: 'Do my private images get uploaded to any external server?',
+    a: 'No, absolutely not. Unlike other online image compressors, ImageSqueeze performs 100% of its computation locally inside your browser using the HTML5 Canvas API and TypedArrays. Your files never cross the internet or touch any remote server. You can even disconnect your Wi-Fi after opening the page and continue compressing seamlessly.'
+  },
+  {
+    q: 'How do I use the interactive split-screen comparator?',
+    a: 'Click on any thumbnail in the batch queue to load it into the comparator. Click and drag the vertical blue divider left and right to inspect the original pixels versus the compressed output. You can use the vertical Quality slider or type a number into the box on the right to fine-tune the compression level with real-time live preview.'
+  },
+  {
+    q: 'Which format should I choose: Auto, JPG, PNG, or WebP?',
+    a: 'By default, "Auto (JPG/PNG)" automatically determines the smaller file size between JPG and PNG while strictly preserving PNG if your graphic contains transparent alpha pixels. Choose JPG for photographs, PNG for logos and icons requiring crisp edges and transparency, or WebP for modern websites seeking the absolute lowest file size and highest Google PageSpeed scores.'
+  },
+  {
+    q: 'Can I compress multiple images simultaneously and download them in a ZIP?',
+    a: 'Yes! You can drop multiple images into the upload area simultaneously. Each image is processed concurrently in the background. You can adjust quality settings individually, save single files, or click "Download All (.ZIP)" to package the entire batch into a clean ZIP archive with a single click.'
+  },
+  {
+    q: 'Will compressing an image alter its pixel dimensions (width & height)?',
+    a: 'No. Image compression optimizes the bitstream and color depth while leaving the original pixel resolution (dimensions) completely intact. If you upload a 4000×3000 image, it will remain exactly 4000×3000 pixels after compression, only with a dramatically reduced file size.'
+  },
+  {
+    q: 'How does image compression improve Google SEO and Core Web Vitals?',
+    a: 'Large, uncompressed graphics are the primary culprit behind poor Largest Contentful Paint (LCP) scores and slow mobile load times. Google penalizes slow websites in its search ranking algorithm. Compressing your images ensures rapid rendering (< 2.5s), eliminates layout shifts, reduces bounce rates, and boosts mobile conversion rates.'
+  },
+  {
+    q: 'Is ImageSqueeze completely free to use?',
+    a: 'Yes, ImageSqueeze is 100% free with no registration, no daily caps, no hidden subscriptions, and zero watermarks applied to your exported images.'
+  }
 ].forEach((f,i)=>{
-  const el=document.createElement('div'); el.className='border border-gray-100 rounded-xl overflow-hidden bg-white';
-  el.innerHTML=`<button class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition" onclick="tFaq(${i})" id="fb${i}" aria-expanded="false"><span class="font-semibold text-gray-800 text-sm pr-4">${f.q}</span><span id="fi${i}" class="text-blue-500 text-xl font-light flex-shrink-0 leading-none">+</span></button><div class="faq-body bg-gray-50" id="fd${i}"><p class="px-5 py-4 text-gray-500 text-sm leading-relaxed">${f.a}</p></div>`;
+  const el=document.createElement('div'); el.className='border border-gray-200 rounded-xl overflow-hidden bg-white shadow-xs';
+  el.innerHTML=`<button class="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50/80 transition" onclick="tFaq(${i})" id="fb${i}" aria-expanded="false"><span class="font-bold text-gray-900 text-sm pr-4">${f.q}</span><span id="fi${i}" class="text-blue-600 text-xl font-medium flex-shrink-0 leading-none">+</span></button><div class="faq-body bg-gray-50/50" id="fd${i}"><p class="px-5 py-4 text-gray-600 text-xs sm:text-sm leading-relaxed border-t border-gray-100">${f.a}</p></div>`;
   $('faq-list').appendChild(el);
 });
 function tFaq(i){
