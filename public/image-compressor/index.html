@@ -692,10 +692,34 @@ const loadImg = src => new Promise((res,rej) => { const i=new Image(); i.onload=
 const toDataURL = f => new Promise((res,rej) => { const r=new FileReader(); r.onload=e=>res(e.target.result); r.onerror=rej; r.readAsDataURL(f); });
 const toBlob = (canvas,mime,q) => new Promise(res => canvas.toBlob(b=>res(b), mime, q/100));
 
+function showNotice(msg) {
+  let box = $('app-notice');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'app-notice';
+    box.className = 'fixed bottom-5 left-1/2 -translate-x-1/2 max-w-lg w-[92%] bg-slate-900 text-white border border-slate-700 text-xs sm:text-sm font-medium px-5 py-3.5 rounded-xl shadow-2xl z-[9999] flex items-center justify-between gap-3 transition-all duration-300';
+    document.body.appendChild(box);
+  }
+  box.innerHTML = `<span>${msg}</span><button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white font-bold text-lg leading-none">&times;</button>`;
+  box.style.display = 'flex';
+  clearTimeout(box._timer);
+  box._timer = setTimeout(() => { if (box) box.remove(); }, 9000);
+}
+
 // ── Compression core ───────────────────────────────────
 async function compress(file, quality, requestedMime) {
-  const url = await toDataURL(file);
-  const img = await loadImg(url);
+  let url = '';
+  let img;
+  try {
+    url = URL.createObjectURL(file);
+    img = await loadImg(url);
+  } catch(e) {
+    const dataUrl = await toDataURL(file);
+    img = await loadImg(dataUrl);
+  } finally {
+    if (url) URL.revokeObjectURL(url);
+  }
+
   procCanvas.width  = img.naturalWidth;
   procCanvas.height = img.naturalHeight;
   const ctx = procCanvas.getContext('2d');
@@ -755,8 +779,12 @@ async function compressToKB(file, kb, mime) {
 
 // ── Add files ──────────────────────────────────────────
 function addFiles(files) {
-  const imgs = [...files].filter(f => f.type.startsWith('image/'));
-  if (!imgs.length) return;
+  const isImg = f => (f.type && f.type.startsWith('image/')) || /\.(png|jpe?g|webp|gif|bmp|avif|tiff?|ico)$/i.test(f.name);
+  const imgs = [...files].filter(isImg);
+  if (!imgs.length) {
+    showNotice('⚠️ Please select valid image files (JPEG, PNG, WebP, GIF, BMP, AVIF).');
+    return;
+  }
   imgs.forEach(f => S.queue.push({ id:uid(), file:f, origSize:f.size, blob:null, blobURL:null, origURL:null, pct:null, mime:null, status:'pending' }));
   toolArea.classList.remove('hidden');
   renderCards();
@@ -784,14 +812,18 @@ function renderCards() {
       card.appendChild(thumb);
     } else {
       const ph = document.createElement('div');
-      ph.className = 'thumb bg-gray-100 flex items-center justify-center';
-      ph.innerHTML = '<div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full spin-anim"></div>';
+      ph.className = 'thumb bg-gray-100 flex items-center justify-center text-center p-2';
+      if (item.status === 'error') {
+        ph.innerHTML = '<span class="text-xs text-red-500 font-semibold leading-tight">Offline Cloud File</span>';
+      } else {
+        ph.innerHTML = '<div class="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full spin-anim"></div>';
+      }
       card.appendChild(ph);
     }
 
     const overlay = document.createElement('div'); overlay.className = 'pct-overlay';
     const pctTxt = document.createElement('div'); pctTxt.className = 'pct-text';
-    pctTxt.textContent = item.pct !== null ? (item.pct > 0 ? `−${item.pct}%` : `+${Math.abs(item.pct)}%`) : (item.status === 'processing' ? '…' : '');
+    pctTxt.textContent = item.pct !== null ? (item.pct > 0 ? `−${item.pct}%` : `+${Math.abs(item.pct)}%`) : (item.status === 'error' ? '⚠️' : item.status === 'processing' ? '…' : '');
     overlay.appendChild(pctTxt); card.appendChild(overlay);
 
     const rmBtn = document.createElement('button'); rmBtn.className = 'remove-btn'; rmBtn.textContent = '×'; rmBtn.title = 'Remove';
@@ -805,6 +837,9 @@ function renderCards() {
       saveBtn.addEventListener('click', e => { e.stopPropagation(); dlBlob(item.blob, outName(item.file.name, item.mime)); });
     } else if (item.status === 'processing') {
       saveBtn.textContent = 'Processing…'; saveBtn.disabled = true; saveBtn.style.background = '#94a3b8';
+    } else if (item.status === 'error') {
+      saveBtn.textContent = 'Error'; saveBtn.disabled = true; saveBtn.style.background = '#ef4444';
+      card.title = item.errorMsg || 'Failed to read file';
     } else {
       saveBtn.textContent = 'Pending'; saveBtn.disabled = true; saveBtn.style.background = '#cbd5e1';
     }
@@ -844,13 +879,27 @@ async function doCompressAll() {
 
 async function processItem(item, q, mime) {
   item.status = 'processing';
-  if (!item.origURL) item.origURL = await toDataURL(item.file);
   renderCards();
   try {
+    if (item.file.size === 0) {
+      throw new Error('This file has 0 bytes or is stored offline in OneDrive.');
+    }
+    if (!item.origURL) {
+      try {
+        item.origURL = URL.createObjectURL(item.file);
+      } catch(e) {
+        item.origURL = await toDataURL(item.file);
+      }
+    }
     const res = await compress(item.file, q, mime);
     applyResult(item, res.blob, q, res.mime);
     if (S.queue.filter(i=>i.status==='done').length === 1) setPreview(item.id);
-  } catch(e) { item.status = 'error'; console.error(e); }
+  } catch(e) {
+    item.status = 'error';
+    item.errorMsg = e.message || 'Failed to read image';
+    console.error('Failed to process image:', item.file.name, e);
+    showNotice(`⚠️ "${item.file.name}" could not be opened. If it has a cloud icon (OneDrive), right-click it in Windows and choose "Always keep on this device".`);
+  }
   renderCards();
 }
 
@@ -868,7 +917,10 @@ function applyResult(item, blob, q, mime) {
 async function setPreview(id) {
   const item = S.queue.find(i=>i.id===id); if (!item || item.status!=='done') return;
   S.activeId = id;
-  if (!item.origURL) item.origURL = await toDataURL(item.file);
+  if (!item.origURL) {
+    try { item.origURL = URL.createObjectURL(item.file); }
+    catch(e) { item.origURL = await toDataURL(item.file); }
+  }
   comparatorSec.classList.remove('hidden');
   imgBefore.src = item.origURL;
   imgAfter.src  = item.blobURL;
