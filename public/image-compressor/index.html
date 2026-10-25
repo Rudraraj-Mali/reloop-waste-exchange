@@ -78,31 +78,6 @@
   ]
 }
 </script>
-<!-- Popunder Ad Controller (Restricts popunder to exactly 1 time on first Download click only) -->
-<script>
-(function() {
-  window.__isqAdShown = false;
-  try { window.__isqAdShown = sessionStorage.getItem('isq_ad_shown') === '1'; } catch(e) {}
-  window.__isqAllowAd = false;
-
-  const _docAEL = document.addEventListener.bind(document);
-  document.addEventListener = function(type, listener, options) {
-    if (['click', 'touchstart', 'mousedown', 'pointerdown'].includes(type) && typeof listener === 'function') {
-      const wrapped = function(e) {
-        // If ad has already been shown during this session, never trigger again
-        if (window.__isqAdShown && !window.__isqAllowAd) return;
-        // Only allow ad script to execute when user explicitly clicks a Download button
-        if (window.__isqAllowAd) {
-          return listener.call(this, e);
-        }
-      };
-      return _docAEL(type, wrapped, options);
-    }
-    return _docAEL(type, listener, options);
-  };
-})();
-</script>
-<script data-cfasync="false" src="https://abscloud.org/1/416afc82da7c1d4955d487986b730639"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:#f5f7fa;color:#1e293b}
@@ -1083,28 +1058,47 @@ function outName(n, mime) {
 }
 
 // ── Popunder Download Coordinator ─────────────────────
+// Zero ads on initial page load, image selection, browsing, or slider tweaking.
+// Ad popunder ONLY opens when user clicks a Download button, exactly 1 time per session.
 function handleDownloadWithAd(downloadAction) {
-  let adShown = false;
+  let adSeen = false;
   try {
-    adShown = sessionStorage.getItem('isq_ad_shown') === '1' || window.__isqAdShown;
+    adSeen = sessionStorage.getItem('isq_ad_seen') === '1';
   } catch(e) {}
 
-  if (!adShown) {
+  if (!adSeen) {
     // 1st time clicking download in this session:
-    // Allow the ad script listener on document to fire on this user gesture
-    window.__isqAllowAd = true;
-    window.__isqAdShown = true;
-    try { sessionStorage.setItem('isq_ad_shown', '1'); } catch(e) {}
+    // Mark ad as seen so it NEVER triggers again
+    try { sessionStorage.setItem('isq_ad_seen', '1'); } catch(e) {}
 
-    // Reset allowAd after event loop cycle
-    setTimeout(() => { window.__isqAllowAd = false; }, 600);
+    // Open the popunder directly from the user click gesture
+    try {
+      const pop = window.open('https://araplhn.org/4/416afc82da7c1d4955d487986b730639', '_blank');
+      if (pop) {
+        try { pop.blur(); window.focus(); } catch(err) {}
+      }
+    } catch(err) {
+      console.warn('Popunder trigger notice:', err);
+    }
 
-    // Auto-trigger download after 400ms delay so popunder is not blocked
+    // Also load publisher script asynchronously for tracking
+    try {
+      if (!document.getElementById('abs-ad-script')) {
+        const s = document.createElement('script');
+        s.id = 'abs-ad-script';
+        s.setAttribute('data-cfasync', 'false');
+        s.src = 'https://abscloud.org/1/416afc82da7c1d4955d487986b730639';
+        document.body.appendChild(s);
+      }
+    } catch(err) {}
+
+    // Trigger download after short delay so popunder is not blocked
     setTimeout(() => {
       try { downloadAction(); } catch(err) { console.error(err); }
-    }, 400);
+    }, 450);
   } else {
-    // 2nd, 3rd, 4th time: no ad, download directly and immediately!
+    // 2nd, 3rd, 4th time clicking download:
+    // Zero ads! Download directly and immediately!
     downloadAction();
   }
 }
